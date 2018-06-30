@@ -3,6 +3,7 @@ package com.asad.couponesController.customer;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,18 @@ import com.asad.couponesController.CustomerPurchaseData;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
+import com.asad.couponesController.IncomeServices.IncomeServices;
+import com.asad.couponesController.IncomeData;
 import com.asad.couponesController.coupons.CouponRepository;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
+import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
+import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
+import com.asad.couponesController.exceptions.IdIsNullException;
+import com.asad.couponesController.exceptions.IncomeIsNullException;
 @Service
 public class CustomerServicesImpl implements CustomerServices{
    private static Map<Long, Customer> customers = new HashMap<>();
@@ -25,38 +32,12 @@ public class CustomerServicesImpl implements CustomerServices{
    @Autowired
    private CustomerRepository customerDao; 
    @Autowired
-   private CouponRepository couponDao; 
+   private CouponRepository couponDao;
+   @Autowired
+   private IncomeServices incomeServices;
    
-   //TODO:finsh the Purchase coupon method
-	@Override
-	public synchronized Coupon beyACoupon(CustomerPurchaseData customerData) throws CouponIsAlreadyPurchasedException {
-		if (customerData.getCustomerId()!= null) {
-			
-			Coupon dbCouponCheck =this.couponDao.findCouponByTitle(customerData.getCoupon().getTitle());
-			Customer customer  = customers.get(customerData.getCustomerId());
-		if ( dbCouponCheck != null && customer != null) {
-			
-			for (Coupon customersCouponCheck : customer.getCoupons()) {
-				if (customersCouponCheck.getTitle().equals(dbCouponCheck.getTitle())) {
-					throw new CouponIsAlreadyPurchasedException("can not purchase coupon twice");
-				}
-			}
-		if (customerData.getCoupon().getEndDate().isAfter(LocalDate.now())) {
-			Customer customerFromDb = customerDao.findCustomerByName(customer.getName());
-			customerFromDb.getCoupons().add(dbCouponCheck);
-			customerDao.save(customerFromDb);
-			Long customerId= customerData.getCustomerId();
-			this.customers.remove(customerId);
-			this.customers.put(customerId, customerFromDb);
-							
-		}
-		}
-		}
-		return null;
-	}
-
-
-	@Override
+   
+   @Override
 	public synchronized LogInResponse logInCheck(LogIn logIn) {
 		if (logIn.getUserId()!= null) {
 		 Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
@@ -77,5 +58,62 @@ public class CustomerServicesImpl implements CustomerServices{
 		// TODO add log out Customer
 		return null;
 	}
+   
+   
+   
+   //TODO:finsh the Purchase coupon method
+	@Override
+	public synchronized Coupon beyACoupon(CustomerPurchaseData customerData) throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, IncomeIsNullException {
+		if (customerData.getCustomerId()!= null) {
+			
+			Coupon dbCouponCheck =this.couponDao.findCouponByTitle(customerData.getCoupon().getTitle());
+			Customer customer  = customers.get(customerData.getCustomerId());
+		if ( dbCouponCheck != null && customer != null) {
+			
+			for (Coupon customersCouponCheck : customer.getCoupons()) {
+				if (customersCouponCheck.getTitle().equals(dbCouponCheck.getTitle())) {
+					throw new CouponIsAlreadyPurchasedException("can not purchase the same coupon twice");
+				}
+			}
+		if (customerData.getCoupon().getEndDate().isAfter(LocalDate.now())) {
+			Customer customerFromDb = customerDao.findCustomerByName(customer.getName());
+			customerFromDb.getCoupons().add(dbCouponCheck);
+			customerDao.save(customerFromDb);
+			Long customerId= customerData.getCustomerId();
+			this.customers.remove(customerId);
+			this.customers.put(customerId, customerFromDb);
+			Coupon coupon =customerData.getCoupon();
+			 incomeServices.storeIncome(new IncomeData(coupon, customerFromDb));
+			return coupon;			
+		}else {
+			throw new CustomerPurchaseDataException(" the coupon is no longer available");
+		}
+		}else {
+			throw new CustomerPurchaseDataException("the customer or the coupon does not exist");
+		}
+		
+		}else {
+			throw new IdIsNullException("you need to log in");
+		}
+	
+	}
+
+
+	@Override
+	public Set<Coupon> getAllCoupon(Long customerId) throws IdIsNullException, ComponentNotFoundException {
+		if(customerId !=null) {
+			Customer customer = customers.get(customerId);
+			if (customer != null) {
+				return customer.getCoupons();
+			}else {
+				throw new ComponentNotFoundException("the customer data is not found check the passId");
+			}
+		}else
+		throw new IdIsNullException("customer id is null");
+		
+	}
+
+
+	
 
 }

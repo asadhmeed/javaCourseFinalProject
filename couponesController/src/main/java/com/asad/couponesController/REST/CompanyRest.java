@@ -22,6 +22,7 @@ import com.asad.couponesController.coupons.CouponServices;
 import com.asad.couponesController.entitys.Coupon;
 
 import com.asad.couponesController.enums.LogInEnum;
+import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 
 @RequestMapping("/companyRest")
@@ -33,10 +34,10 @@ public class CompanyRest implements CouponClaintREST {
 
 	@Override
 	@GetMapping("/logIn")
-	public synchronized LogInResponse logIn(@RequestBody LogIn logIn) {
+	public synchronized Response logIn(@RequestBody LogIn logIn)throws LogInDataIsNullException  {
 							           
 		
-		return new LogInResponse(LogInEnum.LOGINFAILED);
+		return new Response(companyServices.logInCheck(logIn));
 	}
 
 	

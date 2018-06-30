@@ -24,6 +24,8 @@ import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
+import com.asad.couponesController.exceptions.IdIsNullException;
+import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 
 /**
@@ -54,9 +56,11 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * 
 	 * @see com.asad.couponesController.administrator.AdministratorServices#logInCheck(com.asad.couponesController.LogIn)
 	 */
-	public LogInResponse logInCheck(LogIn logIn) {
+	public LogInResponse logInCheck(LogIn logIn) throws LogInDataIsNullException {
     //TODO:remove logger  (admin service)
 		AppLogger.getLogger().log(Level.INFO, logIn.toString());
+		if (logIn != null) {
+			
 		
 		if (logIn.getUserId()!= null) {
 			return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
@@ -68,8 +72,30 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		}
 		return new LogInResponse(LogInEnum.LOGINFAILED)  ;
 	}
+		}else
+		{
+			throw new LogInDataIsNullException("admin data is null");
+		}
 		}
 
+	@Override
+	public ResponseMassageEnum logout(Long id) throws IdIsNullException {
+		// TODO add log out admin
+		
+		if(id != null) {
+			for (Long id1 : logInIds) {
+				if (id == id1) {
+					logInIds.remove(id);
+					return ResponseMassageEnum.LOGOUTSUCCESS;
+				}
+			}
+		}else {
+			throw new IdIsNullException("admin id is null ");
+		}
+		return ResponseMassageEnum.LOGOUTFAILED;
+		
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.asad.couponesController.administrator.AdministratorServices#creatCompany(com.asad.couponesController.entitys.Company)
 	 */
@@ -215,5 +241,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 		return customerDao.findCustomerById(id);
 	}
+
+
+
+	
 
 }

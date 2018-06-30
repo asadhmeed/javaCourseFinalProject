@@ -1,37 +1,51 @@
 package com.asad.couponesController.REST;
 
-import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.asad.couponesController.CustomerPurchaseData;
 import com.asad.couponesController.LogIn;
-import com.asad.couponesController.LogInResponse;
-import com.asad.couponesController.entitys.Coupon;
-import com.asad.couponesController.enums.LogInEnum;
+import com.asad.couponesController.Response;
+import com.asad.couponesController.IncomeServices.IncomeServices;
+import com.asad.couponesController.customer.CustomerServices;
+import com.asad.couponesController.entitys.Customer;
+import com.asad.couponesController.exceptions.ComponentNotFoundException;
+import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
+import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
+import com.asad.couponesController.exceptions.IdIsNullException;
+import com.asad.couponesController.exceptions.IncomeIsNullException;
+import com.asad.couponesController.exceptions.LogInDataIsNullException;
+
 @RequestMapping("/customerRest")
 @RestController
 public class CustomerRest implements CouponClaintREST {
 
+	@Autowired
+	private CustomerServices customerServices;
+	@Autowired
+	private IncomeServices incomeServices;
 	
+
 	@PostMapping("/logIn")
 	@Override
-	public LogInResponse logIn(@RequestBody LogIn logIn) { 
-		
-		return new LogInResponse(LogInEnum.LOGINFAILED);
+	public Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException {
+
+		return new Response( customerServices.logInCheck(logIn));
 	}
 
-	@PostMapping("/beyCoupon")
-	public void beyCoupon(@RequestBody Coupon coupon){
+	@PostMapping("/purchaseCoupon")
+	public Response purchaseCoupon(@RequestBody CustomerPurchaseData customerData)
+			throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, IncomeIsNullException {
 		
+		
+		return new Response(customerServices.beyACoupon(customerData));
 	}
-	
-	
-	@PostMapping("/listAllCustomerCoupon")
-	public List<Coupon> listAllCustomerCoupon(){
+
+	@PostMapping("/listAllCustomerCoupons")
+	public Response listAllCustomerCoupons(Long customerId) throws IdIsNullException, ComponentNotFoundException {
 		
-		return null;
+		return new Response(customerServices.getAllCoupon(customerId));
 	}
 }

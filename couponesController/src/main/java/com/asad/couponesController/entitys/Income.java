@@ -8,6 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.asad.couponesController.enums.IncomeType;
+
 @Entity
 @Table(name= "")
 public class Income {
@@ -20,9 +22,20 @@ public class Income {
 	
 	private LocalDate date;
 	
-	private String descrption;
+	private IncomeType descrption;
 	
 	private Double amount;
+	
+	
+	
+
+	public Income(String name, LocalDate date, IncomeType descrption, Double amount) {
+		super();
+		this.name = name;
+		this.date = date;
+		this.descrption = descrption;
+		this.amount = amount;
+	}
 
 	public Long getId() {
 		return id;
@@ -48,11 +61,11 @@ public class Income {
 		this.date = date;
 	}
 
-	public String getDescrption() {
+	public IncomeType getDescrption() {
 		return descrption;
 	}
 
-	public void setDescrption(String descrption) {
+	public void setDescrption(IncomeType descrption) {
 		this.descrption = descrption;
 	}
 

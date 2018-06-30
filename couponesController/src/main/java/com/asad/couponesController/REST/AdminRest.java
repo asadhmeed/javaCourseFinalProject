@@ -17,6 +17,7 @@ import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
+import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 @RestController
 @RequestMapping("/adminRest")
@@ -31,9 +32,9 @@ public class AdminRest implements CouponClaintREST
 	
 	@PostMapping("/logIn")
 	@Override
-	public synchronized LogInResponse logIn(@RequestBody LogIn logIn) 
+	public synchronized Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException 
 	{
-			return admin.logInCheck(logIn);
+			return new Response(admin.logInCheck(logIn));
 	}
 	
 //Companies--------------------------------------------------
@@ -65,7 +66,7 @@ public class AdminRest implements CouponClaintREST
 		return new Response(admin.listAllCompany());
 	}
 	@GetMapping("/getCompany")
-	public Company getCompanyByName(@RequestBody String name) 
+	public Response getCompanyByName(@RequestBody String name) 
 	{
 		
 		return null;
@@ -79,35 +80,35 @@ public class AdminRest implements CouponClaintREST
 	
 //Customers------------------------------------------
 	@PostMapping("/creatCustomer")
-	public boolean creatCustomer(@RequestBody Customer customer) //CustomerCreated
+	public Response creatCustomer(@RequestBody Customer customer) //CustomerCreated
 	{
 		
-		return false;
+		return null;
 	}
 	
 	
 	@PostMapping("/deleteCustomer")
-	public boolean deleteCustomer( @RequestBody Customer customer) //CustomerDeleted
+	public Response deleteCustomer( @RequestBody Customer customer) //CustomerDeleted
 	{
-		return false;
+		return null;
 		
 	}
 	
 	@PostMapping("/updateCustomer")
-	public boolean updateCustomer() //CustomerUpdated
+	public Response updateCustomer() //CustomerUpdated
 	{
 		
-		return false;
+		return null;
 	}
 		
 	@GetMapping("/listAllCustomers")
-	public List<Customer> listAllCustomers() 
+	public Response listAllCustomers() 
 	{
 		
 		return null;
 	}
 	@GetMapping("/getCustomer")
-	public Customer getCustomerByName(@RequestBody String name) 
+	public Response getCustomerByName(@RequestBody String name) 
 	{
 		
 		return null;

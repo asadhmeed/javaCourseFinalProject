@@ -11,6 +11,11 @@ public class ComponentNotFoundException extends Exception{
 		
 	}
 
+	public ComponentNotFoundException(String arg0) {
+		super(arg0);
+		
+	}
+
 	
 	
 }

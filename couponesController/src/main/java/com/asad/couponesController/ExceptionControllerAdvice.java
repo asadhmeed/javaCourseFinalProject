@@ -4,9 +4,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.asad.couponesController.IncomeServices.IncomeIsNullException;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
+import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 
 @ControllerAdvice
