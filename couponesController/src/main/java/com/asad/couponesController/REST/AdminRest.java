@@ -11,12 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
+import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
 import com.asad.couponesController.administrator.AdministratorServices;
+import com.asad.couponesController.company.CompanyServices;
+import com.asad.couponesController.customer.CustomerServices;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
+import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
+import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 @RestController
@@ -30,33 +35,39 @@ public class AdminRest implements CouponClaintREST
 	@Autowired
 	private AdministratorServices admin;
 	
-	@PostMapping("/logIn")
+	@PostMapping("/adminlogIn")
 	@Override
 	public synchronized Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException 
 	{
 			return new Response(admin.logInCheck(logIn));
 	}
 	
+	@PostMapping("/adminLogOut")
+	@Override
+	public synchronized Response logout(Long Id) throws IdIsNullException
+	{
+		return new Response(admin.logout(Id));
+	}
 //Companies--------------------------------------------------
 	@PostMapping("/creatCompany")
-	public Response creatCompany(@RequestBody Company company) throws NameIsUsedException //companyCreated
+	public Response creatCompany(@RequestBody RequestData companyRequestData) throws NameIsUsedException //companyCreated
 	{
 
-			return new Response(admin.creatCompany(company));
+			return new Response(admin.creatCompany(companyRequestData));
 
 		
 	}
 	
 	
 	@PostMapping("/deleteCompany")
-	public Response deleteCompany(@RequestBody Company company) throws ComponentNotFoundException //companyDeleted
+	public Response deleteCompany(@RequestBody RequestData companyRequestData) throws ComponentNotFoundException //companyDeleted
 	{ 
-			return new Response(admin.deleteCompany(company));
+			return new Response(admin.deleteCompany(companyRequestData));
 	}
 	@PostMapping("/updateCompany")
-	public Response updateCompany(@RequestBody Company company) //companyUpdated
+	public Response updateCompany(@RequestBody RequestData companyRequestData) throws IdIsNullException //companyUpdated
 	{
-		return new Response(admin.updateCompany(company));
+		return new Response(admin.updateCompany(companyRequestData));
 		
 	}
 	
@@ -66,10 +77,10 @@ public class AdminRest implements CouponClaintREST
 		return new Response(admin.listAllCompany());
 	}
 	@GetMapping("/getCompany")
-	public Response getCompanyByName(@RequestBody String name) 
+	public Response getCompanyByName(@RequestBody RequestData companyRequestData) 
 	{
 		
-		return null;
+		return new Response(admin.getCompanyById(companyRequestData));
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -80,38 +91,38 @@ public class AdminRest implements CouponClaintREST
 	
 //Customers------------------------------------------
 	@PostMapping("/creatCustomer")
-	public Response creatCustomer(@RequestBody Customer customer) //CustomerCreated
+	public Response creatCustomer(@RequestBody RequestData customerRequestData) throws NameIsUsedException //CustomerCreated
 	{
 		
-		return null;
+		return new Response(admin.creatCustomer(customerRequestData));
 	}
 	
 	
 	@PostMapping("/deleteCustomer")
-	public Response deleteCustomer( @RequestBody Customer customer) //CustomerDeleted
+	public Response deleteCustomer( @RequestBody RequestData customerRequestData) throws ComponentNotFoundException //CustomerDeleted
 	{
-		return null;
+		return new Response(admin.deleteCustomer(customerRequestData));
 		
 	}
 	
 	@PostMapping("/updateCustomer")
-	public Response updateCustomer() //CustomerUpdated
+	public Response updateCustomer(@RequestBody RequestData customerRequestData) throws ComponentNotFoundException //CustomerUpdated
 	{
 		
-		return null;
+		return new Response(admin.deleteCustomer(customerRequestData));
 	}
 		
 	@GetMapping("/listAllCustomers")
 	public Response listAllCustomers() 
 	{
 		
-		return null;
+		return new Response(admin.listAllCustomers());
 	}
-	@GetMapping("/getCustomer")
-	public Response getCustomerByName(@RequestBody String name) 
+	@PostMapping("/getCustomer")
+	public Response getCustomerById(@RequestBody RequestData customerRequestData) 
 	{
 		
-		return null;
+		return new Response(admin.getCustomerById(customerRequestData));
 	}
 		
 	

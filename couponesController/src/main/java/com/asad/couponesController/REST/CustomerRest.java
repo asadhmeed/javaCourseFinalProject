@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.asad.couponesController.CustomerPurchaseData;
+import com.asad.couponesController.RequestData;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.Response;
 import com.asad.couponesController.IncomeServices.IncomeServices;
@@ -34,9 +34,14 @@ public class CustomerRest implements CouponClaintREST {
 
 		return new Response( customerServices.logInCheck(logIn));
 	}
-
+	@PostMapping("/customerLogOut")
+	@Override
+	public synchronized Response logout(Long Id) throws IdIsNullException
+	{
+		return new Response(customerServices.logout(Id));
+	}
 	@PostMapping("/purchaseCoupon")
-	public Response purchaseCoupon(@RequestBody CustomerPurchaseData customerData)
+	public Response purchaseCoupon(@RequestBody RequestData customerData)
 			throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, IncomeIsNullException {
 		
 		

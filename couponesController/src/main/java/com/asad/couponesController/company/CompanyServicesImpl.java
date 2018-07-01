@@ -1,7 +1,9 @@
 package com.asad.couponesController.company;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
+import com.asad.couponesController.RequestData;
 import com.asad.couponesController.coupons.CouponRepository;
+import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
@@ -21,7 +25,8 @@ import com.mysql.jdbc.log.Log;
 @Service
 public class CompanyServicesImpl implements CompanyServices {
 
-	private List<Long> logInIds = new ArrayList<>();
+	
+	private Map<Long,Company> logInedCompanys = new HashMap<>();
 
 	@Autowired
 	private CouponRepository couponDao;
@@ -31,12 +36,14 @@ public class CompanyServicesImpl implements CompanyServices {
 	@Override
 	public LogInResponse logInCheck(LogIn logIn) throws LogInDataIsNullException {
 		if (logIn != null) {
-			if (logIn.getUserId() != null) {
+			if (logIn.getUserId() != null && logInedCompanys.get(logIn.getUserId())!=null) {
 				return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
 			} else {
-				if (companyDao.findCompanyByCompanyNameAndPassword(logIn.getUserName(), logIn.getPassword()) != null) {
+				
+				Company company =companyDao.findCompanyByCompanyNameAndPassword(logIn.getUserName(), logIn.getPassword());
+				if ( company!= null) {
 						Long id = LoginIdGenerator.generateId();
-						logInIds.add(id);
+						logInedCompanys.put(id, company);
 						return new LogInResponse(LogInEnum.LOGINSUCCESS, id);
 				} else {
 					return new LogInResponse(LogInEnum.LOGINFAILED);
@@ -51,9 +58,9 @@ public class CompanyServicesImpl implements CompanyServices {
 	@Override
 	public ResponseMassageEnum logout(Long id) throws IdIsNullException {
 		if (id != null) {
-			for (Long id1 : logInIds) {
+			for (Long id1 : logInedCompanys.keySet()) {
 				if (id == id1) {
-					logInIds.remove(id);
+					logInedCompanys.remove(id);
 					return ResponseMassageEnum.LOGOUTSUCCESS;
 				}
 			}
@@ -64,10 +71,10 @@ public class CompanyServicesImpl implements CompanyServices {
 
 	}
 
-	public Coupon creatCoupon(Coupon coupon) throws NameIsUsedException {
+	public Coupon creatCoupon(RequestData coupon) throws NameIsUsedException {
 		try {
-
-			return couponDao.save(coupon);
+			
+			return couponDao.save(coupon.getCoupon());
 		} catch (Exception e) {
 
 			System.out.println(e.getStackTrace());

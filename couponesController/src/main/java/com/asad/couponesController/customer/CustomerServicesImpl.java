@@ -8,7 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.asad.couponesController.CustomerPurchaseData;
+import com.asad.couponesController.RequestData;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
@@ -63,11 +63,11 @@ public class CustomerServicesImpl implements CustomerServices{
    
    //TODO:finsh the Purchase coupon method
 	@Override
-	public synchronized Coupon beyACoupon(CustomerPurchaseData customerData) throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, IncomeIsNullException {
-		if (customerData.getCustomerId()!= null) {
+	public synchronized Coupon beyACoupon(RequestData customerData) throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, IncomeIsNullException {
+		if (customerData.getClientId()!= null) {
 			
 			Coupon dbCouponCheck =this.couponDao.findCouponByTitle(customerData.getCoupon().getTitle());
-			Customer customer  = customers.get(customerData.getCustomerId());
+			Customer customer  = customers.get(customerData.getClientId());
 		if ( dbCouponCheck != null && customer != null) {
 			
 			for (Coupon customersCouponCheck : customer.getCoupons()) {
@@ -79,7 +79,7 @@ public class CustomerServicesImpl implements CustomerServices{
 			Customer customerFromDb = customerDao.findCustomerByName(customer.getName());
 			customerFromDb.getCoupons().add(dbCouponCheck);
 			customerDao.save(customerFromDb);
-			Long customerId= customerData.getCustomerId();
+			Long customerId= customerData.getClientId();
 			this.customers.remove(customerId);
 			this.customers.put(customerId, customerFromDb);
 			Coupon coupon =customerData.getCoupon();

@@ -2,6 +2,7 @@ package com.asad.couponesController.administrator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -13,6 +14,7 @@ import com.asad.couponesController.AppLogger;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
+import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
 import com.asad.couponesController.company.CompanyRepository;
 import com.asad.couponesController.coupons.CouponRepository;
@@ -27,6 +29,7 @@ import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
+import com.asad.couponesController.exceptions.notLogedInException;
 
 /**
  * @author asad
@@ -35,7 +38,7 @@ import com.asad.couponesController.exceptions.NameIsUsedException;
 @Service
 public class AdministratorServicesImpl implements AdministratorServices {
 
-	private List<Long> logInIds =new ArrayList<>();
+	private static List<Long> logInIds =new ArrayList<>();
 	
 //connection to the customers table in the data base
 	@Autowired
@@ -72,10 +75,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		}
 		return new LogInResponse(LogInEnum.LOGINFAILED)  ;
 	}
-		}else
-		{
-			throw new LogInDataIsNullException("admin data is null");
 		}
+			throw new LogInDataIsNullException("admin data is null");
+		
 		}
 
 	@Override
@@ -99,14 +101,14 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/* (non-Javadoc)
 	 * @see com.asad.couponesController.administrator.AdministratorServices#creatCompany(com.asad.couponesController.entitys.Company)
 	 */
-	public Company creatCompany(Company company) throws NameIsUsedException {
+	public Company creatCompany(RequestData requestData) throws NameIsUsedException {
 		try {
-			Set<Coupon> coupons= company.getCoupons();	
+			Set<Coupon> coupons= requestData.getCompany().getCoupons();	
 			for (Coupon coupon : coupons) {
 				couponDao.save(coupon);	
 			}
 			
-			return companyDao.save(company);
+			return companyDao.save(requestData.getCompany());
 		} catch (Exception e) {
 
 			throw new NameIsUsedException("The Name Of The Company Or Name  One Of The Coupons Is Already Used", e);
@@ -118,9 +120,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/* (non-Javadoc)
 	 * @see com.asad.couponesController.administrator.AdministratorServices#deleteCompany(com.asad.couponesController.entitys.Company)
 	 */
-	public ResponseMassageEnum deleteCompany(Company company) throws ComponentNotFoundException {
+	public ResponseMassageEnum deleteCompany(RequestData requestData) throws ComponentNotFoundException {
 		try {
-			companyDao.delete(company);
+			companyDao.delete(requestData.getCompany());
 
 			return ResponseMassageEnum.COMPANYDELETED;
 		} catch (Exception e) {
@@ -132,26 +134,33 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/* (non-Javadoc)
 	 * @see com.asad.couponesController.administrator.AdministratorServices#updateCompany(com.asad.couponesController.entitys.Company)
 	 */
-	public ResponseMassageEnum updateCompany(Company company) {
-		AppLogger.getLogger().log(Level.INFO , company.getCoupons().toString());
-		
-		// companyDao.updateCompany(company);
-		Company companyfromDataBase = companyDao.findCompanyByCompanyName(company.getCompanyName());
-		if (!(companyfromDataBase != null)) {
+	public ResponseMassageEnum updateCompany(RequestData requestData) throws IdIsNullException, notLogedInException {
+		AppLogger.getLogger().log(Level.INFO , requestData.getCompany().getCoupons().toString());
+		Long adminId= requestData.getClientId();
+	if (requestData !=null && adminId !=null) {
+		if (logInIds.contains(adminId)) {
+			
+		Company companyfromDataBase = companyDao.findCompanyByCompanyName(requestData.getCompany().getCompanyName());
+		if (companyfromDataBase == null) {
 			return ResponseMassageEnum.COMPANYNOTFOUND;
 		} else {
-			Set<Coupon> coupons = company.getCoupons();
-			Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
-			if (coupons != null) {
-			for (int i = 0; i < coupons.size(); i++) {
-				couponDao.save((Coupon)coupons.toArray()[i]);
-				existingCoupons.add((Coupon)coupons.toArray()[i]);
-			}
+//			Set<Coupon> coupons = requestData.getCompany().getCoupons();
+//			Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
+//			if (coupons != null) {
+//			for (int i = 0; i < coupons.size(); i++) {
+//				couponDao.save((Coupon)coupons.toArray()[i]);
+//				existingCoupons.add((Coupon)coupons.toArray()[i]);
+//			}
+//			companyfromDataBase.setCoupons(existingCoupons);
 			}
 			companyDao.save(companyfromDataBase);
 			return ResponseMassageEnum.THECOMPANYUPDATED;
+	
 		}
-
+		throw new notLogedInException("please log in to do this task");
+		
+		}
+	throw new IdIsNullException("admin id or request data is null");
 	}
 
 	/* (non-Javadoc)
@@ -159,7 +168,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public List<Company> listAllCompany() {
 
-
+		//TODO:check if the client logged in by id 
 		List<Company> companies =(List<Company>) companyDao.findAll();
 		//TODO:remove Logger
 		AppLogger.getLogger().log(Level.INFO, companies.get(0).getCoupons().toString());
@@ -167,12 +176,20 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		return companies;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#getCompanyByName(java.lang.String)
-	 */
-	public Company getCompanyById(Long id) {
-
-		return companyDao.findCompanyById(id);
+	
+	public Company getCompanyById(RequestData companyRequestData) throws IdIsNullException,notLogedInException {
+		try {
+			if (logInIds.contains(companyRequestData.getClientId())) {
+				
+			
+			return companyDao.findCompanyById(companyRequestData.getCustomer().getId());
+			}else {
+				throw new notLogedInException("please log in to do this task");
+			}
+		} catch (Exception e) {
+			throw new IdIsNullException("some of the data you sent is not valid or null");
+		}
+		
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -183,10 +200,10 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/* (non-Javadoc)
 	 * @see com.asad.couponesController.administrator.AdministratorServices#creatCustomer(com.asad.couponesController.entitys.Customer)
 	 */
-	public Customer creatCustomer(Customer customer) throws NameIsUsedException {
-
+	public Customer creatCustomer(RequestData customerRequestData) throws NameIsUsedException {
+		//TODO:check if the client logged in by id 
 		try {
-			return this.customerDao.save(customer);
+			return this.customerDao.save(customerRequestData.getCustomer());
 			
 		}catch(Exception e) {
 			throw new NameIsUsedException("The Name Of The Customer Is Allready Used", e);
@@ -196,11 +213,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * 
 	 */
-	public ResponseMassageEnum deleteCustomer(Customer customer) throws ComponentNotFoundException // CustomerDeleted
+	public ResponseMassageEnum deleteCustomer(RequestData customerRequestData) throws ComponentNotFoundException // CustomerDeleted
 	{
+	//TODO:check if the client logged in by id 
 		 
 		try {
-			customerDao.delete(customer);
+			customerDao.delete(customerRequestData.getCustomer());
 
 			return ResponseMassageEnum.CUSTUMBERDELETED;
 		} catch (Exception e) {
@@ -228,6 +246,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * @return
 	 */
+	@Override
 	public List<Customer> listAllCustomers() {
 
 		return (List<Customer>) customerDao.findAll();
@@ -236,11 +255,28 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * @param name
 	 * @return
+	 * @throws IdIsNullException 
 	 */
-	public Customer getCustomerById(Long id) {
-
-		return customerDao.findCustomerById(id);
+	@Override
+	public Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException,notLogedInException {
+		try {
+			if (logInIds.contains(customerRequestData.getClientId())) {
+				
+			
+			return customerDao.findCustomerById(customerRequestData.getCustomer().getId());
+			}else {
+				throw new notLogedInException("please log in to do this task");
+			}
+		} catch (Exception e) {
+			throw new IdIsNullException("some of the data you sent is not valid or null");
+		}
 	}
+
+	
+
+	
+
+	
 
 
 
