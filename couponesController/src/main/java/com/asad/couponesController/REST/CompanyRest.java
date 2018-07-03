@@ -39,7 +39,7 @@ public class CompanyRest implements CouponClaintREST {
 	public synchronized Response logIn(@RequestBody LogIn logIn)throws LogInDataIsNullException  {
 							           
 		
-		return new Response(companyServices.logInCheck(logIn));
+		return new Response(companyServices.logIn(logIn));
 	}
 
 	@PostMapping("/companyLogOut")

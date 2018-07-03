@@ -38,77 +38,85 @@ import com.asad.couponesController.exceptions.notLogedInException;
 @Service
 public class AdministratorServicesImpl implements AdministratorServices {
 
-	private static List<Long> logInIds =new ArrayList<>();
-	
-//connection to the customers table in the data base
+	private static List<Long> logInIds = new ArrayList<>();
+
+	// connection to the customers table in the data base
 	@Autowired
 	private CompanyRepository companyDao;
 
-//connection to the companies table in the data base
+	// connection to the companies table in the data base
 	@Autowired
 	private CustomerRepository customerDao;
-	
-//connection to the companies table in the data base
+
+	// connection to the companies table in the data base
 	@Autowired
 	private CouponRepository couponDao;
 
-	
-	
-
-	/* 
+	/*
 	 * 
-	 * @see com.asad.couponesController.administrator.AdministratorServices#logInCheck(com.asad.couponesController.LogIn)
+	 * @see
+	 * com.asad.couponesController.administrator.AdministratorServices#logInCheck(
+	 * com.asad.couponesController.LogIn)
 	 */
-	public LogInResponse logInCheck(LogIn logIn) throws LogInDataIsNullException {
-    //TODO:remove logger  (admin service)
+	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException {
+		// TODO:remove logger (admin service)
 		AppLogger.getLogger().log(Level.INFO, logIn.toString());
-		if (logIn != null) {
+		try {
+
 			
-		
-		if (logIn.getUserId()!= null) {
-			return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
-		}else {
-		if (logIn.getUserName().trim().equals("admin") && logIn.getPassword().trim().equals("1234")) {
-			Long id = LoginIdGenerator.generateId();
-			this.logInIds.add(id);
-			return new LogInResponse(LogInEnum.LOGINSUCCESS,id) ;
+			if (logInIds.contains(logIn.getUserId())) {
+
+				return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
+			} else {
+				if (logIn.getUserName().trim().equals("admin") && logIn.getPassword().trim().equals("1234")) {
+					Long id = LoginIdGenerator.generateId();
+					this.logInIds.add(id);
+					return new LogInResponse(LogInEnum.LOGINSUCCESS, id);
+				}
+				return new LogInResponse(LogInEnum.LOGINFAILED);
+			}
+		} catch (NullPointerException e) {
+			throw new LogInDataIsNullException("admin data is null or not valid");
 		}
-		return new LogInResponse(LogInEnum.LOGINFAILED)  ;
+
 	}
-		}
-			throw new LogInDataIsNullException("admin data is null");
-		
-		}
 
 	@Override
 	public ResponseMassageEnum logout(Long id) throws IdIsNullException {
-		// TODO add log out admin
-		
-		if(id != null) {
+
+		try {
 			for (Long id1 : logInIds) {
 				if (id == id1) {
 					logInIds.remove(id);
 					return ResponseMassageEnum.LOGOUTSUCCESS;
 				}
 			}
-		}else {
-			throw new IdIsNullException("admin id is null ");
+		} catch (NullPointerException e) {
+			throw new IdIsNullException("admin id is null");
 		}
 		return ResponseMassageEnum.LOGOUTFAILED;
-		
+
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#creatCompany(com.asad.couponesController.entitys.Company)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.asad.couponesController.administrator.AdministratorServices#creatCompany(
+	 * com.asad.couponesController.entitys.Company)
 	 */
-	public Company creatCompany(RequestData requestData) throws NameIsUsedException {
+	public Company creatCompany(RequestData companyData) throws NameIsUsedException, notLogedInException {
+		logInCheck(companyData, "plase log in to do this task");
 		try {
-			Set<Coupon> coupons= requestData.getCompany().getCoupons();	
-			for (Coupon coupon : coupons) {
-				couponDao.save(coupon);	
+			if (companyData.getCompany().getCoupons() != null) {
+				Set<Coupon> coupons = companyData.getCompany().getCoupons();
+				for (Coupon coupon : coupons) {
+
+					couponDao.save(coupon);
+				}
 			}
-			
-			return companyDao.save(requestData.getCompany());
+
+			return companyDao.save(companyData.getCompany());
 		} catch (Exception e) {
 
 			throw new NameIsUsedException("The Name Of The Company Or Name  One Of The Coupons Is Already Used", e);
@@ -117,79 +125,84 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#deleteCompany(com.asad.couponesController.entitys.Company)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.asad.couponesController.administrator.AdministratorServices#deleteCompany
+	 * (com.asad.couponesController.entitys.Company)
 	 */
-	public ResponseMassageEnum deleteCompany(RequestData requestData) throws ComponentNotFoundException {
+	public ResponseMassageEnum deleteCompany(RequestData companyData)
+			throws ComponentNotFoundException, notLogedInException {
+
+		logInCheck(companyData, "plase log in to do this task");
+
 		try {
-			companyDao.delete(requestData.getCompany());
+			companyDao.delete(companyData.getCompany());
 
 			return ResponseMassageEnum.COMPANYDELETED;
 		} catch (Exception e) {
-			throw new ComponentNotFoundException("the company you want to delete does not exist", e);
+			throw new ComponentNotFoundException("the company you want to delete  does not exist", e);
 
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#updateCompany(com.asad.couponesController.entitys.Company)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.asad.couponesController.administrator.AdministratorServices#updateCompany
+	 * (com.asad.couponesController.entitys.Company)
 	 */
-	public ResponseMassageEnum updateCompany(RequestData requestData) throws IdIsNullException, notLogedInException {
-		AppLogger.getLogger().log(Level.INFO , requestData.getCompany().getCoupons().toString());
-		Long adminId= requestData.getClientId();
-	if (requestData !=null && adminId !=null) {
-		if (logInIds.contains(adminId)) {
-			
-		Company companyfromDataBase = companyDao.findCompanyByCompanyName(requestData.getCompany().getCompanyName());
+	public ResponseMassageEnum updateCompany(RequestData companyData) throws notLogedInException {
+		AppLogger.getLogger().log(Level.INFO, companyData.getCompany().getCoupons().toString());
+
+		logInCheck(companyData, "plase log in to do this task");
+
+		Company companyfromDataBase = companyDao.findCompanyByCompanyName(companyData.getCompany().getCompanyName());
 		if (companyfromDataBase == null) {
 			return ResponseMassageEnum.COMPANYNOTFOUND;
 		} else {
-//			Set<Coupon> coupons = requestData.getCompany().getCoupons();
-//			Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
-//			if (coupons != null) {
-//			for (int i = 0; i < coupons.size(); i++) {
-//				couponDao.save((Coupon)coupons.toArray()[i]);
-//				existingCoupons.add((Coupon)coupons.toArray()[i]);
-//			}
-//			companyfromDataBase.setCoupons(existingCoupons);
-			}
-			companyDao.save(companyfromDataBase);
-			return ResponseMassageEnum.THECOMPANYUPDATED;
-	
+			// Set<Coupon> coupons = requestData.getCompany().getCoupons();
+			// Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
+			// if (coupons != null) {
+			// for (int i = 0; i < coupons.size(); i++) {
+			// couponDao.save((Coupon)coupons.toArray()[i]);
+			// existingCoupons.add((Coupon)coupons.toArray()[i]);
+			// }
+			// companyfromDataBase.setCoupons(existingCoupons);
 		}
-		throw new notLogedInException("please log in to do this task");
-		
-		}
-	throw new IdIsNullException("admin id or request data is null");
+		companyDao.save(companyfromDataBase);
+		return ResponseMassageEnum.THECOMPANYUPDATED;
+
 	}
 
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#listAllCompany()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.asad.couponesController.administrator.AdministratorServices#
+	 * listAllCompany()
 	 */
-	public List<Company> listAllCompany() {
+	public List<Company> listAllCompany(RequestData companyData) throws notLogedInException {
 
-		//TODO:check if the client logged in by id 
-		List<Company> companies =(List<Company>) companyDao.findAll();
-		//TODO:remove Logger
+		logInCheck(companyData, "plase log in to do this task");
+		List<Company> companies = (List<Company>) companyDao.findAll();
+		// TODO:remove Logger
 		AppLogger.getLogger().log(Level.INFO, companies.get(0).getCoupons().toString());
-		
+
 		return companies;
 	}
 
-	
-	public Company getCompanyById(RequestData companyRequestData) throws IdIsNullException,notLogedInException {
+	public Company getCompanyById(RequestData companyData) throws IdIsNullException, notLogedInException {
+
+		logInCheck(companyData, "plase log in to do this task");
 		try {
-			if (logInIds.contains(companyRequestData.getClientId())) {
-				
-			
-			return companyDao.findCompanyById(companyRequestData.getCustomer().getId());
-			}else {
-				throw new notLogedInException("please log in to do this task");
-			}
+			return companyDao.findCompanyById(companyData.getCustomer().getId());
+
 		} catch (Exception e) {
 			throw new IdIsNullException("some of the data you sent is not valid or null");
 		}
-		
+
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -197,28 +210,33 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	////////////////////////////////////////////////////////////////////////
 
 	// Customers------------------------------------------
-	/* (non-Javadoc)
-	 * @see com.asad.couponesController.administrator.AdministratorServices#creatCustomer(com.asad.couponesController.entitys.Customer)
+	/**
+	 * 
 	 */
-	public Customer creatCustomer(RequestData customerRequestData) throws NameIsUsedException {
-		//TODO:check if the client logged in by id 
+	public Customer creatCustomer(RequestData customerData) throws NameIsUsedException, notLogedInException {
+
+		logInCheck(customerData, "plase log in to do this task");
+
 		try {
-			return this.customerDao.save(customerRequestData.getCustomer());
-			
-		}catch(Exception e) {
+			return this.customerDao.save(customerData.getCustomer());
+
+		} catch (Exception e) {
 			throw new NameIsUsedException("The Name Of The Customer Is Allready Used", e);
 		}
 	}
 
 	/**
+	 * @throws notLogedInException
 	 * 
 	 */
-	public ResponseMassageEnum deleteCustomer(RequestData customerRequestData) throws ComponentNotFoundException // CustomerDeleted
-	{
-	//TODO:check if the client logged in by id 
-		 
+	public ResponseMassageEnum deleteCustomer(RequestData customerData) throws ComponentNotFoundException // CustomerDeleted
+			, notLogedInException {
+
+		logInCheck(customerData, "plase log in to do this task");
+
 		try {
-			customerDao.delete(customerRequestData.getCustomer());
+			Customer customer = customerDao.findCustomerByName(customerData.getCustomer().getName());
+			customerDao.delete(customer);
 
 			return ResponseMassageEnum.CUSTUMBERDELETED;
 		} catch (Exception e) {
@@ -230,10 +248,13 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * @param customer
 	 * @return
+	 * @throws notLogedInException
 	 */
-	public ResponseMassageEnum updateCustomer(Customer customer) // CustomerUpdated
+	public ResponseMassageEnum updateCustomer(RequestData customerData) throws notLogedInException // CustomerUpdated
 	{
-		Customer customerfromDataBase = customerDao.findCustomerByName(customer.getName());
+		logInCheck(customerData, "plase log in to do this task");
+
+		Customer customerfromDataBase = customerDao.findCustomerByName(customerData.getCustomer().getName());
 		boolean customerFound = customerfromDataBase != null;
 		if (!customerFound) {
 			return ResponseMassageEnum.CUSTOMERNOTFOUND;
@@ -245,9 +266,11 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	/**
 	 * @return
+	 * @throws notLogedInException
 	 */
 	@Override
-	public List<Customer> listAllCustomers() {
+	public List<Customer> listAllCustomers(RequestData adminData) throws notLogedInException {
+		logInCheck(adminData, "plase log in to do this task");
 
 		return (List<Customer>) customerDao.findAll();
 	}
@@ -255,31 +278,31 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * @param name
 	 * @return
-	 * @throws IdIsNullException 
+	 * @throws IdIsNullException
+	 *             ,notLogedInException
 	 */
 	@Override
-	public Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException,notLogedInException {
+	public Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException, notLogedInException {
+
+		logInCheck(customerRequestData, "plase log in to do this task");
 		try {
-			if (logInIds.contains(customerRequestData.getClientId())) {
-				
-			
 			return customerDao.findCustomerById(customerRequestData.getCustomer().getId());
-			}else {
-				throw new notLogedInException("please log in to do this task");
-			}
-		} catch (Exception e) {
+
+		} catch (NullPointerException e) {
 			throw new IdIsNullException("some of the data you sent is not valid or null");
 		}
 	}
 
-	
+	private void logInCheck(RequestData requestData, String textMessage) throws notLogedInException {
+		Long id = requestData.getClientId();
+		try {
+			if (!logInIds.contains(id)) {
+				throw new notLogedInException(textMessage);
+			}
+		} catch (NullPointerException e) {
+			throw new notLogedInException("id cannot be null", e);
+		}
 
-	
-
-	
-
-
-
-	
+	}
 
 }

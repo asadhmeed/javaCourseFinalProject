@@ -20,6 +20,7 @@ import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
+import com.asad.couponesController.exceptions.notLogedInException;
 import com.mysql.jdbc.log.Log;
 
 @Service
@@ -34,7 +35,7 @@ public class CompanyServicesImpl implements CompanyServices {
 	private CompanyRepository companyDao;
 
 	@Override
-	public LogInResponse logInCheck(LogIn logIn) throws LogInDataIsNullException {
+	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException {
 		if (logIn != null) {
 			if (logIn.getUserId() != null && logInedCompanys.get(logIn.getUserId())!=null) {
 				return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
@@ -93,6 +94,11 @@ public class CompanyServicesImpl implements CompanyServices {
 	public Coupon deleteCoupon(Coupon coupon) {
 
 		return null;
+	}
+
+		private void logInCheck(RequestData requestData, String textMessage) throws notLogedInException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

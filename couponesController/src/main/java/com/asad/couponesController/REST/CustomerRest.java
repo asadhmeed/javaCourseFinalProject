@@ -32,7 +32,7 @@ public class CustomerRest implements CouponClaintREST {
 	@Override
 	public Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException {
 
-		return new Response( customerServices.logInCheck(logIn));
+		return new Response( customerServices.logIn(logIn));
 	}
 	@PostMapping("/customerLogOut")
 	@Override

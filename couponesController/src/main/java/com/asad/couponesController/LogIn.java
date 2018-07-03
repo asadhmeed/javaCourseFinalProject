@@ -2,7 +2,7 @@ package com.asad.couponesController;
 
 public class LogIn {
 
-	private String userId;
+	private Long userId;
 	private String userName;
 	private String password;
 	
@@ -31,11 +31,11 @@ public class LogIn {
 		this.password = password;
 	}
 
-	public String getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 

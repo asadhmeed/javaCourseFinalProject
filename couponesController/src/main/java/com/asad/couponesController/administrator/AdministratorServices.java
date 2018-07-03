@@ -14,15 +14,15 @@ import com.asad.couponesController.exceptions.notLogedInException;
 public interface AdministratorServices extends LogInService {
 
 	
-	public Company creatCompany( RequestData requestData) throws NameIsUsedException ;
-	public ResponseMassageEnum deleteCompany( RequestData requestData) throws ComponentNotFoundException;
+	public Company creatCompany( RequestData requestData) throws NameIsUsedException, notLogedInException ;
+	public ResponseMassageEnum deleteCompany( RequestData requestData) throws ComponentNotFoundException, notLogedInException;
 	public ResponseMassageEnum updateCompany(RequestData requestData) throws IdIsNullException, notLogedInException;
-	public List<Company> listAllCompany();
+	public List<Company> listAllCompany(RequestData companyData) throws notLogedInException;
 	public Company getCompanyById( RequestData companyRequestData) throws IdIsNullException, notLogedInException;
 	
-	public Customer creatCustomer( RequestData requestData) throws NameIsUsedException;
-	public ResponseMassageEnum deleteCustomer(  RequestData requestData)  throws ComponentNotFoundException;
-	List<Customer> listAllCustomers();
+	public Customer creatCustomer( RequestData requestData) throws NameIsUsedException, notLogedInException;
+	public ResponseMassageEnum deleteCustomer(  RequestData requestData)  throws ComponentNotFoundException, notLogedInException;
+	List<Customer> listAllCustomers(RequestData adminData) throws notLogedInException;
 	Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException, notLogedInException;
 	
 }

@@ -24,6 +24,7 @@ import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
 import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.IncomeIsNullException;
+import com.asad.couponesController.exceptions.notLogedInException;
 @Service
 public class CustomerServicesImpl implements CustomerServices{
    private static Map<Long, Customer> customers = new HashMap<>();
@@ -38,7 +39,7 @@ public class CustomerServicesImpl implements CustomerServices{
    
    
    @Override
-	public synchronized LogInResponse logInCheck(LogIn logIn) {
+	public synchronized LogInResponse logIn(LogIn logIn) {
 		if (logIn.getUserId()!= null) {
 		 Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
 	     if (customer != null) {
@@ -110,6 +111,13 @@ public class CustomerServicesImpl implements CustomerServices{
 			}
 		}else
 		throw new IdIsNullException("customer id is null");
+		
+	}
+
+
+	
+	private void logInCheck(RequestData requestData, String textMessage) throws notLogedInException {
+		// TODO Auto-generated method stub
 		
 	}
 
