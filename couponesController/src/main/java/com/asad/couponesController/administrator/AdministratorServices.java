@@ -9,20 +9,23 @@ import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
+import com.asad.couponesController.exceptions.RequestDataIsNullException;
 import com.asad.couponesController.exceptions.notLogedInException;
 
 public interface AdministratorServices extends LogInService {
 
 	
-	public Company creatCompany( RequestData requestData) throws NameIsUsedException, notLogedInException ;
-	public ResponseMassageEnum deleteCompany( RequestData requestData) throws ComponentNotFoundException, notLogedInException;
-	public ResponseMassageEnum updateCompany(RequestData requestData) throws IdIsNullException, notLogedInException;
-	public List<Company> listAllCompany(RequestData companyData) throws notLogedInException;
-	public Company getCompanyById( RequestData companyRequestData) throws IdIsNullException, notLogedInException;
+	public Company creatCompany( RequestData requestData) throws NameIsUsedException, notLogedInException, RequestDataIsNullException ;
+	public ResponseMassageEnum deleteCompany( RequestData requestData) throws ComponentNotFoundException, notLogedInException, RequestDataIsNullException;
+	public ResponseMassageEnum updateCompany(RequestData requestData) throws IdIsNullException, notLogedInException, RequestDataIsNullException;
+	public List<Company> listAllCompany(RequestData companyData) throws notLogedInException, RequestDataIsNullException;
+	public Company getCompanyById( RequestData companyRequestData) throws IdIsNullException, notLogedInException, RequestDataIsNullException;
 	
-	public Customer creatCustomer( RequestData requestData) throws NameIsUsedException, notLogedInException;
-	public ResponseMassageEnum deleteCustomer(  RequestData requestData)  throws ComponentNotFoundException, notLogedInException;
-	List<Customer> listAllCustomers(RequestData adminData) throws notLogedInException;
-	Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException, notLogedInException;
+	public Customer creatCustomer( RequestData requestData) throws NameIsUsedException, notLogedInException, RequestDataIsNullException;
+	public ResponseMassageEnum deleteCustomer(  RequestData requestData)  throws ComponentNotFoundException, notLogedInException, RequestDataIsNullException;
+	public ResponseMassageEnum updateCustomer(RequestData customerData) throws notLogedInException 
+	, RequestDataIsNullException;
+	List<Customer> listAllCustomers(RequestData adminData) throws notLogedInException, RequestDataIsNullException;
+	Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException, notLogedInException, RequestDataIsNullException;
 	
 }
