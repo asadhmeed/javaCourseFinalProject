@@ -15,10 +15,11 @@ import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.NullCheck;
 import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.CheckClientRequest;
-import com.asad.couponesController.IncomeData;
 import com.asad.couponesController.coupons.CouponRepository;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Customer;
+import com.asad.couponesController.enums.ActionType;
+import com.asad.couponesController.enums.ClientType;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
@@ -88,9 +89,8 @@ public class CustomerServicesImpl implements CustomerServices {
 				Long customerId = couponData.getClientId();
 				this.customers.remove(customerId);
 				this.customers.put(customerId, customer);
-				Coupon coupon = couponData.getCoupon();
-				incomeServices.storeIncome(new IncomeData(coupon, customer));
-				return coupon;
+				
+				return couponData.getCoupon();
 			} else {
 				throw new CustomerPurchaseDataException(" the coupon is no longer available");
 			}
@@ -101,7 +101,7 @@ public class CustomerServicesImpl implements CustomerServices {
 	}
 
 	@Override
-	public Set<Coupon> getAllCoupon(RequestData customerData) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException {
+	public Set<Coupon> getAllCouponForCustomer(RequestData customerData) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException {
 		logInCheck(customerData);
 		NullCheck.checkIfItIsNull(customerData.getCustomer(), "customer data is empty");
 		Long customerId = customerData.getClientId();
@@ -114,6 +114,9 @@ public class CustomerServicesImpl implements CustomerServices {
 			}
 		
 	}
+	
+	
+	
 
 	private void logInCheck(RequestData requestData) throws notLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(requestData, "your request is empty ");

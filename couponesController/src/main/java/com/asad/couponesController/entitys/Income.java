@@ -2,6 +2,7 @@ package com.asad.couponesController.entitys;
 
 import java.time.LocalDate;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,7 +22,7 @@ public class Income {
 	private String name;
 	
 	private LocalDate date;
-	
+	@Convert(converter = IncomeTypeConverter.class)
 	private IncomeType descrption;
 	
 	private Double amount;

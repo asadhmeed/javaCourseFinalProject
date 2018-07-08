@@ -13,6 +13,7 @@ import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
+import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.administrator.AdministratorServices;
 import com.asad.couponesController.company.CompanyServices;
 import com.asad.couponesController.customer.CustomerServices;
@@ -34,6 +35,8 @@ public class AdminRest implements CouponClaintREST {
 
 	@Autowired
 	private AdministratorServices admin;
+	@Autowired
+	private IncomeServices income;
 
 	@PostMapping("/adminlogIn")
 	@Override
@@ -51,7 +54,9 @@ public class AdminRest implements CouponClaintREST {
 	@PostMapping("/creatCompany")
 	public Response creatCompany(@RequestBody RequestData companyRequestData) throws NameIsUsedException // companyCreated
 			, notLogedInException, RequestDataIsNullException {
-		return new Response(admin.creatCompany(companyRequestData));
+	return new Response(admin.creatCompany(companyRequestData));
+		
+	
 	}
 
 	@PostMapping("/deleteCompany")

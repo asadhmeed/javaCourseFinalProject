@@ -61,17 +61,20 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * com.asad.couponesController.administrator.AdministratorServices#logInCheck(
 	 * com.asad.couponesController.LogIn)
 	 */
-	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
+	public synchronized LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
 		// TODO:remove logger (admin service)
 		AppLogger.getLogger().log(Level.INFO, logIn.toString());
-		NullCheck.checkIfItIsNull(logIn, "log in data is null please send the right data");
+		new CheckClientRequest().checkLogIn(logIn);
+		
 
-		try {
-
-			if (logInIds.contains(logIn.getUserId())) {
+			if (logIn.getUserId()!= null && logInIds.contains(logIn.getUserId())) {
 
 				return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
 			} else {
+				
+				if (logIn.getUserId() != null) {
+					return new LogInResponse(LogInEnum.USERIDISNOTVALID);
+				}
 				if (logIn.getUserName().trim().equals("admin") && logIn.getPassword().trim().equals("1234")) {
 					Long id = LoginIdGenerator.generateId();
 					this.logInIds.add(id);
@@ -79,14 +82,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 				}
 				return new LogInResponse(LogInEnum.LOGINFAILED);
 			}
-		} catch (NullPointerException e) {
-			throw new LogInDataIsNullException("admin data is null or not valid");
-		}
+		
 
 	}
 
 	@Override
-	public ResponseMassageEnum logout(Long id) throws RequestDataIsNullException {
+	public synchronized ResponseMassageEnum logout(Long id) throws RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(id, "admin id is null");
 
 		for (Long id1 : logInIds) {

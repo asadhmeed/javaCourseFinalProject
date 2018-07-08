@@ -6,7 +6,6 @@ import com.asad.couponesController.RequestData;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.administrator.LogInService;
-import com.asad.couponesController.IncomeData;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
@@ -22,5 +21,5 @@ public interface CustomerServices extends LogInService {
 	
 	public  ResponseMassageEnum logout(Long CustomerId);
 	
-	Set<Coupon> getAllCoupon(RequestData requestData) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException;
+	Set<Coupon> getAllCouponForCustomer(RequestData requestData) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException;
 }

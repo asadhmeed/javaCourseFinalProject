@@ -9,9 +9,9 @@ import com.asad.couponesController.exceptions.RequestDataIsNullException;
 public class CheckClientRequest {
 
 	public void checkCompany(RequestData companyData) throws RequestDataIsNullException {
-		
+
 		Company company = companyData.getCompany();
-		NullCheck.checkIfItIsNull(company,CheckClientRequestEnum.COMPANYISEMPTY.toString());
+		NullCheck.checkIfItIsNull(company, CheckClientRequestEnum.COMPANYISEMPTY.toString());
 		NullCheck.checkIfItIsNull(company.getCompanyName(), CheckClientRequestEnum.COMPANYNAMENOTFOUND.toString());
 		NullCheck.checkIfItIsNull(company.getEmail(), CheckClientRequestEnum.COMPANYEMAILNOTFOUND.toString());
 		NullCheck.checkIfItIsNull(company.getCompanyName(), CheckClientRequestEnum.COMPANYPASSWORDNOTFOUND.toString());
@@ -27,7 +27,7 @@ public class CheckClientRequest {
 	}
 
 	public void checkCoupon(RequestData couponData) throws RequestDataIsNullException {
-		
+
 		Coupon coupon = couponData.getCoupon();
 		NullCheck.checkIfItIsNull(coupon, CheckClientRequestEnum.COUPONISEMPTY.toString());
 		NullCheck.checkIfItIsNull(coupon.getTitle(), CheckClientRequestEnum.COUPONTITLENOTFOUND.toString());
@@ -40,4 +40,13 @@ public class CheckClientRequest {
 		NullCheck.checkIfItIsNull(coupon.getImage(), CheckClientRequestEnum.COUPONIMAGENOTFOUND.toString());
 
 	}
+
+	public void checkLogIn(LogIn logIn) throws RequestDataIsNullException {
+		NullCheck.checkIfItIsNull(logIn, CheckClientRequestEnum.LOGINREQUSTISEMPTY.toString());
+		NullCheck.checkIfItIsNull(logIn.getUserName(), CheckClientRequestEnum.LOGINUSERNAMEISEMPTY.toString());
+		NullCheck.checkIfItIsNull(logIn.getPassword(), CheckClientRequestEnum.LOGINPASSWORDISEMPTY.toString());
+
+		
+	}
+
 }

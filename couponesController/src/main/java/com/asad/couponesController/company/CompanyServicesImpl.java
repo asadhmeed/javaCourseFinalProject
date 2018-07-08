@@ -38,12 +38,14 @@ public class CompanyServicesImpl implements CompanyServices {
 
 	@Override
 	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(logIn, "log in data is null please send the right data");
-		
+			new CheckClientRequest().checkLogIn(logIn);
 		if (logIn.getUserId() != null && logInedCompanys.get(logIn.getUserId()) != null) {
 			return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
 		} else {
 
+			if (logIn.getUserId() != null) {
+				return new LogInResponse(LogInEnum.USERIDISNOTVALID);
+			}
 			Company company = companyDao.findCompanyByCompanyNameAndPassword(logIn.getUserName(), logIn.getPassword());
 			if (company != null) {
 				Long id = LoginIdGenerator.generateId();
@@ -124,12 +126,14 @@ public class CompanyServicesImpl implements CompanyServices {
 
 	@Override
 	public Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException {
-		NullCheck.checkIfItIsNull(couponData, "your request is empty");
 		logInCheck(couponData, LogInEnum.NOTLOGEDIN);
 		Coupon couponfromDataBase = couponDao.findCouponById(couponData.getCoupon().getId());
-		NullCheck.checkIfItIsNull(couponfromDataBase, "the coupon you want to delete is not found");
-		
-		return null;
+		NullCheck.checkIfItIsNull(couponfromDataBase, ResponseMassageEnum.COUPONNOTFOUND.toString());
+		if (!couponfromDataBase.getTitle().trim().equals(couponData.getCoupon().getTitle().trim())) {
+			throw new RequestDataIsNullException("COUPONSTITLEISNOTMATCH");
+		}
+		couponDao.delete(couponfromDataBase);
+		return couponfromDataBase;
 	}
 
 	private void logInCheck(RequestData requestData, LogInEnum notlogedin) throws notLogedInException, RequestDataIsNullException {

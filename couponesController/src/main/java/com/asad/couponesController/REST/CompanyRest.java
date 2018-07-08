@@ -18,12 +18,17 @@ import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
 import com.asad.couponesController.SpecificCouponDataCheck;
+import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.company.CompanyServices;
 import com.asad.couponesController.coupons.CouponServices;
 import com.asad.couponesController.entitys.Coupon;
-
+import com.asad.couponesController.enums.ActionType;
+import com.asad.couponesController.enums.ClientType;
 import com.asad.couponesController.enums.LogInEnum;
+import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
+import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
 import com.asad.couponesController.exceptions.IdIsNullException;
+import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
@@ -35,6 +40,8 @@ public class CompanyRest implements CouponClaintREST {
 	
 	@Autowired
 	private CompanyServices companyServices;
+	@Autowired
+	private IncomeServices incomeServices;
 
 	@Override
 	@GetMapping("/logIn")
@@ -51,26 +58,26 @@ public class CompanyRest implements CouponClaintREST {
 		return new Response(companyServices.logout(Id));
 	}
 	@PostMapping("/creatCoupon")
-	public Response creatCoupon(@RequestBody RequestData coupon) throws NameIsUsedException //couponCreated
-, RequestDataIsNullException, notLogedInException
+	public Response creatCoupon(@RequestBody RequestData couponData) throws NameIsUsedException //couponCreated
+, RequestDataIsNullException, notLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, IdIsNullException, CustomerPurchaseDataException
 	{
-		AppLogger.getLogger().log(Level.CONFIG, coupon.toString());
-		return new Response(companyServices.creatCoupon(coupon));
+		AppLogger.getLogger().log(Level.CONFIG, couponData.toString());
+//		return new Response(companyServices.creatCoupon(coupon));
+	return incomeServices.storeIncome(couponData, ClientType.COMPANY, ActionType.CREAT);
 	}
 	
 	
 	@DeleteMapping("/deleteCoupon")
-	public Response deleteCoupon(@RequestBody RequestData couponData) //couponDeleted
+	public Response deleteCoupon(@RequestBody RequestData couponData) throws RequestDataIsNullException, notLogedInException //couponDeleted
 	{
 		
 		return new Response(companyServices.deleteCoupon(couponData));
 	}
 	@PostMapping("/updateCoupon")
-	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException //couponUpdated
+	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, NameIsUsedException, IdIsNullException, CustomerPurchaseDataException 
 	{
-		
-		
-		return new Response(companyServices.updateCoupon(couponData));
+		return incomeServices.storeIncome(couponData, ClientType.COMPANY, ActionType.UPDATE);
+		//		return new Response(companyServices.updateCoupon(couponData));
 	}
 	
 	@GetMapping("/listAllCoupons")
