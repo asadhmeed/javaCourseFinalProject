@@ -33,7 +33,7 @@ public class Customer {
 	private String name;
 	
 	private String password;
-	@ManyToMany(fetch = FetchType.EAGER,cascade =CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER)
 	
 	@JoinTable(name="CUSTOMER_COUPON",
 	joinColumns = @JoinColumn(name= "CUSTOMER_ID"),//this class

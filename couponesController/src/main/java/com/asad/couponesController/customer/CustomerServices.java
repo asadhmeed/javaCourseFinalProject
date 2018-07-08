@@ -14,10 +14,13 @@ import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
 import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.IncomeIsNullException;
+import com.asad.couponesController.exceptions.RequestDataIsNullException;
+import com.asad.couponesController.exceptions.notLogedInException;
 
 public interface CustomerServices extends LogInService {
-	Coupon beyACoupon(RequestData customerData)throws CouponIsAlreadyPurchasedException, IdIsNullException,CustomerPurchaseDataException, IncomeIsNullException;
+	Coupon beyACoupon(RequestData customerData)throws CouponIsAlreadyPurchasedException, IdIsNullException,CustomerPurchaseDataException, IncomeIsNullException, RequestDataIsNullException, notLogedInException;
 	
 	public  ResponseMassageEnum logout(Long CustomerId);
-	Set<Coupon> getAllCoupon(Long customerId) throws IdIsNullException, ComponentNotFoundException;
+	
+	Set<Coupon> getAllCoupon(RequestData requestData) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException;
 }

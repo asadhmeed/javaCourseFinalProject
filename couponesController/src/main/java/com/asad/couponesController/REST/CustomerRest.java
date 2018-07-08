@@ -17,6 +17,7 @@ import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
+import com.asad.couponesController.exceptions.RequestDataIsNullException;
 
 @RequestMapping("/customerRest")
 @RestController
@@ -30,7 +31,7 @@ public class CustomerRest implements CouponClaintREST {
 
 	@PostMapping("/logIn")
 	@Override
-	public Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException {
+	public Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
 
 		return new Response( customerServices.logIn(logIn));
 	}

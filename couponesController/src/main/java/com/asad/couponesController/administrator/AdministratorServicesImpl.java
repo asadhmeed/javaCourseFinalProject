@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.asad.couponesController.AppLogger;
+import com.asad.couponesController.CheckClientRequest;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
@@ -108,11 +109,8 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public Company creatCompany(RequestData companyData)
 			throws NameIsUsedException, notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
-		NullCheck.checkIfItIsNull(companyData.getCompany(), "please  enter the company data ");
-		NullCheck.checkIfItIsNull(companyData.getCompany().getCompanyName(), "you mast enter the company name");
-
-		logInCheck(companyData, "plase log in to do this task");
+		new CheckClientRequest().checkCompany(companyData);
+		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		try {
 			if (companyData.getCompany().getCoupons() != null) {
 				Set<Coupon> coupons = companyData.getCompany().getCoupons();
@@ -143,7 +141,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
 		NullCheck.checkIfItIsNull(companyData.getCompany(), "there is no data for the company you want to delete");
 
-		logInCheck(companyData, "plase log in to do this task");
+		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 
 		try {
 			companyDao.delete(companyData.getCompany());
@@ -165,11 +163,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	public ResponseMassageEnum updateCompany(RequestData companyData)
 			throws notLogedInException, RequestDataIsNullException {
 		AppLogger.getLogger().log(Level.INFO, companyData.getCompany().getCoupons().toString());
-		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
-		NullCheck.checkIfItIsNull(companyData.getCompany(), "the company in your requeste is empty");
-		NullCheck.checkIfItIsNull(companyData.getCompany().getId(), "the company id in your requeste is empty");
-		logInCheck(companyData, "plase log in to do this task");
-
+		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
+		new CheckClientRequest().checkCompany(companyData);
+		
 		Company companyfromDataBase = companyDao.findCompanyById(companyData.getCompany().getId());
 		if (companyfromDataBase == null) {
 			return ResponseMassageEnum.COMPANYNOTFOUND;
@@ -199,8 +195,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public List<Company> listAllCompany(RequestData companyData)
 			throws notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
-		logInCheck(companyData, "plase log in to do this task");
+		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		List<Company> companies = (List<Company>) companyDao.findAll();
 		// TODO:remove Logger
 		AppLogger.getLogger().log(Level.INFO, companies.get(0).getCoupons().toString());
@@ -210,11 +205,10 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	public Company getCompanyById(RequestData companyData)
 			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
+		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		NullCheck.checkIfItIsNull(companyData.getCompany(), "you cannot send empty request");
 		NullCheck.checkIfItIsNull(companyData.getCompany().getId(), "the customer id you want to delete is empty");
 
-		logInCheck(companyData, "plase log in to do this task");
 		try {
 			return companyDao.findCompanyById(companyData.getCustomer().getId());
 
@@ -235,10 +229,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public Customer creatCustomer(RequestData customerData)
 			throws NameIsUsedException, notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(customerData, "you cannot send empty request");
-		NullCheck.checkIfItIsNull(customerData.getCustomer(), "the customer you want to creat is empty");
-
-		logInCheck(customerData, "plase log in to do this task");
+		
+		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
+		new CheckClientRequest().checkCustomer(customerData);
 
 		try {
 			return this.customerDao.save(customerData.getCustomer());
@@ -255,11 +248,10 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public ResponseMassageEnum deleteCustomer(RequestData customerData) throws ComponentNotFoundException // CustomerDeleted
 			, notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(customerData, "you cannot send empty request");
+		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
 		NullCheck.checkIfItIsNull(customerData.getCustomer(), "the customer you want to delete is empty");
 		NullCheck.checkIfItIsNull(customerData.getCustomer().getId(), "the customer id you want to delete is empty");
 
-		logInCheck(customerData, "plase log in to do this task");
 
 		try {
 			Customer customer = customerDao.findCustomerById(customerData.getCustomer().getId());
@@ -280,12 +272,10 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	public ResponseMassageEnum updateCustomer(RequestData customerData) throws notLogedInException // CustomerUpdated
 			, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(customerData, "you cannot send empty request");
-		logInCheck(customerData, "plase log in to do this task");
-		NullCheck.checkIfItIsNull(customerData.getCustomer(), "customer data is empty");
-		NullCheck.checkIfItIsNull(customerData.getCustomer().getName(), "please send customer name to do this task");
+		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
+		new CheckClientRequest().checkCustomer(customerData);
 
-		Customer customerfromDataBase = customerDao.findCustomerByName(customerData.getCustomer().getName());
+		Customer customerfromDataBase = customerDao.findCustomerById(customerData.getCustomer().getId());
 		boolean customerFound = customerfromDataBase != null;
 		if (!customerFound) {
 			return ResponseMassageEnum.CUSTOMERNOTFOUND;
@@ -303,8 +293,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	@Override
 	public List<Customer> listAllCustomers(RequestData adminData)
 			throws notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(adminData, "you cannot send empty request");
-		logInCheck(adminData, "plase log in to do this task");
+		logInCheck(adminData, LogInEnum.NOTLOGEDIN);
 
 		return (List<Customer>) customerDao.findAll();
 	}
@@ -319,8 +308,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	@Override
 	public Customer getCustomerById(RequestData customerRequestData)
 			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
-		NullCheck.checkIfItIsNull(customerRequestData, "you cannot send empty request");
-		logInCheck(customerRequestData, "plase log in to do this task");
+		logInCheck(customerRequestData, LogInEnum.NOTLOGEDIN);
 		try {
 			return customerDao.findCustomerById(customerRequestData.getCustomer().getId());
 
@@ -329,11 +317,13 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		}
 	}
 
-	private void logInCheck(RequestData requestData, String textMessage) throws notLogedInException {
+	private void logInCheck(RequestData requestData, LogInEnum logInEnum) throws notLogedInException, RequestDataIsNullException {
+		NullCheck.checkIfItIsNull(requestData, "you cannot send empty request");
+
 		Long id = requestData.getClientId();
 		try {
 			if (!logInIds.contains(id)) {
-				throw new notLogedInException(textMessage);
+				throw new notLogedInException(logInEnum.toString());
 			}
 		} catch (NullPointerException e) {
 			throw new notLogedInException("id cannot be null", e);

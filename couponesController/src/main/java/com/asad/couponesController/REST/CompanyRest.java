@@ -26,6 +26,8 @@ import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
+import com.asad.couponesController.exceptions.RequestDataIsNullException;
+import com.asad.couponesController.exceptions.notLogedInException;
 
 @RequestMapping("/companyRest")
 @RestController
@@ -36,7 +38,7 @@ public class CompanyRest implements CouponClaintREST {
 
 	@Override
 	@GetMapping("/logIn")
-	public synchronized Response logIn(@RequestBody LogIn logIn)throws LogInDataIsNullException  {
+	public synchronized Response logIn(@RequestBody LogIn logIn)throws LogInDataIsNullException, RequestDataIsNullException  {
 							           
 		
 		return new Response(companyServices.logIn(logIn));
@@ -44,12 +46,13 @@ public class CompanyRest implements CouponClaintREST {
 
 	@PostMapping("/companyLogOut")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException
+	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException
 	{
 		return new Response(companyServices.logout(Id));
 	}
 	@PostMapping("/creatCoupon")
 	public Response creatCoupon(@RequestBody RequestData coupon) throws NameIsUsedException //couponCreated
+, RequestDataIsNullException, notLogedInException
 	{
 		AppLogger.getLogger().log(Level.CONFIG, coupon.toString());
 		return new Response(companyServices.creatCoupon(coupon));
@@ -57,24 +60,24 @@ public class CompanyRest implements CouponClaintREST {
 	
 	
 	@DeleteMapping("/deleteCoupon")
-	public Response deleteCoupon(@RequestBody RequestData coupon) //couponDeleted
+	public Response deleteCoupon(@RequestBody RequestData couponData) //couponDeleted
 	{
 		
-		return null;
+		return new Response(companyServices.deleteCoupon(couponData));
 	}
 	@PostMapping("/updateCoupon")
-	public Response updateCoupon(RequestData coupon) //couponUpdated
+	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException //couponUpdated
 	{
 		
 		
-		return null;
+		return new Response(companyServices.updateCoupon(couponData));
 	}
 	
 	@GetMapping("/listAllCoupons")
-	public Response listAllCoupons() 
+	public Response listAllCoupons(@RequestBody RequestData couponData) throws RequestDataIsNullException, notLogedInException 
 	{
 		
-		return new Response(companyServices.listAllCoupons());
+		return new Response(companyServices.listAllCoupons(couponData));
 	}
 	@PostMapping("/getSpecificCoupons")
 	public Response getSpecificCoupons(@RequestBody SpecificCouponDataCheck specificCouponCheck) 

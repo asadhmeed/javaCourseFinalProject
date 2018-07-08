@@ -1,5 +1,5 @@
 package com.asad.couponesController.enums;
 
 public enum LogInEnum {
-LOGINSUCCESS,LOGINFAILED, ALREADYLOGINEDIN;
+LOGINSUCCESS,LOGINFAILED, ALREADYLOGINEDIN, NOTLOGEDIN;
 }

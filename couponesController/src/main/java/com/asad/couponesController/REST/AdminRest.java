@@ -24,6 +24,7 @@ import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
+import com.asad.couponesController.exceptions.RequestDataIsNullException;
 import com.asad.couponesController.exceptions.notLogedInException;
 
 @RestController
@@ -36,44 +37,44 @@ public class AdminRest implements CouponClaintREST {
 
 	@PostMapping("/adminlogIn")
 	@Override
-	public synchronized Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException {
+	public synchronized Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
 		return new Response(admin.logIn(logIn));
 	}
 
 	@PostMapping("/adminLogout")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException {
+	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException {
 		return new Response(admin.logout(Id));
 	}
 
 	// Companies--------------------------------------------------
 	@PostMapping("/creatCompany")
 	public Response creatCompany(@RequestBody RequestData companyRequestData) throws NameIsUsedException // companyCreated
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 		return new Response(admin.creatCompany(companyRequestData));
 	}
 
 	@PostMapping("/deleteCompany")
 	public Response deleteCompany(@RequestBody RequestData companyRequestData) throws ComponentNotFoundException // companyDeleted
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 		return new Response(admin.deleteCompany(companyRequestData));
 	}
 
 	@PostMapping("/updateCompany")
 	public Response updateCompany(@RequestBody RequestData companyRequestData) throws IdIsNullException // companyUpdated
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 		return new Response(admin.updateCompany(companyRequestData));
 
 	}
 
 	@PostMapping("/listAllCompany")
-	public Response listAllCompany(@RequestBody RequestData companyRequestData) throws notLogedInException {
+	public Response listAllCompany(@RequestBody RequestData companyRequestData) throws notLogedInException, RequestDataIsNullException {
 		return new Response(admin.listAllCompany(companyRequestData));
 	}
 
 	@PostMapping("/getCompany")
 	public Response getCompanyByName(@RequestBody RequestData companyRequestData)
-			throws IdIsNullException, notLogedInException {
+			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
 
 		return new Response(admin.getCompanyById(companyRequestData));
 	}
@@ -85,34 +86,34 @@ public class AdminRest implements CouponClaintREST {
 	// Customers------------------------------------------
 	@PostMapping("/creatCustomer")
 	public Response creatCustomer(@RequestBody RequestData customerRequestData) throws NameIsUsedException // CustomerCreated
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 
 		return new Response(admin.creatCustomer(customerRequestData));
 	}
 
 	@PostMapping("/deleteCustomer")
 	public Response deleteCustomer(@RequestBody RequestData customerRequestData) throws ComponentNotFoundException // CustomerDeleted
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 		return new Response(admin.deleteCustomer(customerRequestData));
 
 	}
 
 	@PostMapping("/updateCustomer")
 	public Response updateCustomer(@RequestBody RequestData customerRequestData) throws ComponentNotFoundException // CustomerUpdated
-			, notLogedInException {
+			, notLogedInException, RequestDataIsNullException {
 
 		return new Response(admin.deleteCustomer(customerRequestData));
 	}
 
 	@PostMapping("/listAllCustomers")
-	public Response listAllCustomers(@RequestBody RequestData adminData) throws notLogedInException {
+	public Response listAllCustomers(@RequestBody RequestData adminData) throws notLogedInException, RequestDataIsNullException {
 
 		return new Response(admin.listAllCustomers(adminData));
 	}
 
 	@PostMapping("/getCustomer")
 	public Response getCustomerById(@RequestBody RequestData customerRequestData)
-			throws IdIsNullException, notLogedInException {
+			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
 
 		return new Response(admin.getCustomerById(customerRequestData));
 	}

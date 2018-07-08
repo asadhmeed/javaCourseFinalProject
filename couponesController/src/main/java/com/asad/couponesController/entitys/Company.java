@@ -2,6 +2,8 @@ package com.asad.couponesController.entitys;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,7 +31,7 @@ public class Company {
 	private String companyName;
 	private String password;
 	private String email;
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER , cascade =CascadeType.ALL)
 	@JoinTable(name = "COMPANY_COUPON", joinColumns = @JoinColumn(name = "COMPANY_ID", referencedColumnName = "id"), // this
 																														// class
 			inverseJoinColumns = @JoinColumn(name = "COUPON_ID", referencedColumnName = "id")) // the other class
