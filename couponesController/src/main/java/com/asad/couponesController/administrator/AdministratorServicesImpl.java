@@ -32,7 +32,7 @@ import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 /**
  * @author asad
@@ -109,7 +109,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * com.asad.couponesController.entitys.Company)
 	 */
 	public Company creatCompany(RequestData companyData)
-			throws NameIsUsedException, notLogedInException, RequestDataIsNullException {
+			throws NameIsUsedException, NotLogedInException, RequestDataIsNullException {
 		new CheckClientRequest().checkCompany(companyData);
 		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		try {
@@ -138,7 +138,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * (com.asad.couponesController.entitys.Company)
 	 */
 	public ResponseMassageEnum deleteCompany(RequestData companyData)
-			throws ComponentNotFoundException, notLogedInException, RequestDataIsNullException {
+			throws ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
 		NullCheck.checkIfItIsNull(companyData.getCompany(), "there is no data for the company you want to delete");
 
@@ -161,8 +161,9 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * com.asad.couponesController.administrator.AdministratorServices#updateCompany
 	 * (com.asad.couponesController.entitys.Company)
 	 */
+	
 	public ResponseMassageEnum updateCompany(RequestData companyData)
-			throws notLogedInException, RequestDataIsNullException {
+			throws NotLogedInException, RequestDataIsNullException {
 		AppLogger.getLogger().log(Level.INFO, companyData.getCompany().getCoupons().toString());
 		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		new CheckClientRequest().checkCompany(companyData);
@@ -177,7 +178,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 			// Set<Coupon> coupons = requestData.getCompany().getCoupons();
 			// Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
 			// if (coupons != null) {
-			// for (int i = 0; i < coupons.size(); i++) {
+			///*---for (int i = 0; i < coupons.size(); i++) {
 			// couponDao.save((Coupon)coupons.toArray()[i]);
 			// existingCoupons.add((Coupon)coupons.toArray()[i]);
 			// }
@@ -195,7 +196,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * listAllCompany()
 	 */
 	public List<Company> listAllCompany(RequestData companyData)
-			throws notLogedInException, RequestDataIsNullException {
+			throws NotLogedInException, RequestDataIsNullException {
 		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		List<Company> companies = (List<Company>) companyDao.findAll();
 		// TODO:remove Logger
@@ -205,15 +206,16 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	}
 
 	public Company getCompanyById(RequestData companyData)
-			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
+			throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(companyData, LogInEnum.NOTLOGEDIN);
 		NullCheck.checkIfItIsNull(companyData.getCompany(), "you cannot send empty request");
 		NullCheck.checkIfItIsNull(companyData.getCompany().getId(), "the customer id you want to delete is empty");
 
-		try {
+		try  {
 			return companyDao.findCompanyById(companyData.getCustomer().getId());
 
-		} catch (Exception e) {
+		
+			} catch (Exception e) {
 			throw new IdIsNullException("some of the data you sent is not valid or null");
 		}
 
@@ -229,7 +231,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 * 
 	 */
 	public Customer creatCustomer(RequestData customerData)
-			throws NameIsUsedException, notLogedInException, RequestDataIsNullException {
+			throws NameIsUsedException, NotLogedInException, RequestDataIsNullException {
 		
 		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
 		new CheckClientRequest().checkCustomer(customerData);
@@ -243,12 +245,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	}
 
 	/**
-	 * @throws notLogedInException
+	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
 	 * 
 	 */
 	public ResponseMassageEnum deleteCustomer(RequestData customerData) throws ComponentNotFoundException // CustomerDeleted
-			, notLogedInException, RequestDataIsNullException {
+			, NotLogedInException, RequestDataIsNullException {
 		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
 		NullCheck.checkIfItIsNull(customerData.getCustomer(), "the customer you want to delete is empty");
 		NullCheck.checkIfItIsNull(customerData.getCustomer().getId(), "the customer id you want to delete is empty");
@@ -268,10 +270,10 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	/**
 	 * @param customer
 	 * @return
-	 * @throws notLogedInException
+	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
 	 */
-	public ResponseMassageEnum updateCustomer(RequestData customerData) throws notLogedInException // CustomerUpdated
+	public ResponseMassageEnum updateCustomer(RequestData customerData) throws NotLogedInException // CustomerUpdated
 			, RequestDataIsNullException {
 		logInCheck(customerData, LogInEnum.NOTLOGEDIN);
 		new CheckClientRequest().checkCustomer(customerData);
@@ -288,12 +290,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	/**
 	 * @return
-	 * @throws notLogedInException
+	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
 	 */
 	@Override
 	public List<Customer> listAllCustomers(RequestData adminData)
-			throws notLogedInException, RequestDataIsNullException {
+			throws NotLogedInException, RequestDataIsNullException {
 		logInCheck(adminData, LogInEnum.NOTLOGEDIN);
 
 		return (List<Customer>) customerDao.findAll();
@@ -308,7 +310,7 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	 */
 	@Override
 	public Customer getCustomerById(RequestData customerRequestData)
-			throws IdIsNullException, notLogedInException, RequestDataIsNullException {
+			throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(customerRequestData, LogInEnum.NOTLOGEDIN);
 		try {
 			return customerDao.findCustomerById(customerRequestData.getCustomer().getId());
@@ -318,16 +320,16 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		}
 	}
 
-	private void logInCheck(RequestData requestData, LogInEnum logInEnum) throws notLogedInException, RequestDataIsNullException {
+	private void logInCheck(RequestData requestData, LogInEnum logInEnum) throws NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(requestData, "you cannot send empty request");
 
 		Long id = requestData.getClientId();
 		try {
 			if (!logInIds.contains(id)) {
-				throw new notLogedInException(logInEnum.toString());
+				throw new NotLogedInException(logInEnum.toString());
 			}
 		} catch (NullPointerException e) {
-			throw new notLogedInException("id cannot be null", e);
+			throw new NotLogedInException("id cannot be null", e);
 		}
 
 	}

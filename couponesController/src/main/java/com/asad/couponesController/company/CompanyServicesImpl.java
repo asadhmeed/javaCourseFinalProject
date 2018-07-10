@@ -2,6 +2,7 @@ package com.asad.couponesController.company;
 
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,16 +16,19 @@ import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.NullCheck;
 import com.asad.couponesController.RequestData;
+import com.asad.couponesController.SpecificCouponData;
 import com.asad.couponesController.coupons.CouponRepository;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
+import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
+import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 @Service
 public class CompanyServicesImpl implements CompanyServices {
@@ -75,11 +79,9 @@ public class CompanyServicesImpl implements CompanyServices {
 	}
 
 	public Coupon creatCoupon(RequestData couponData)
-			throws NameIsUsedException, RequestDataIsNullException, notLogedInException {
-		//TODO: create a class to check the data of the company ,customer and coupon that the user entered 
-		//and return an enum to the Client depend on the empty variables in the request 
+			throws NameIsUsedException, RequestDataIsNullException, NotLogedInException {
 		
-		logInCheck(couponData, LogInEnum.NOTLOGEDIN);
+		logInCheck(couponData);
 		new CheckClientRequest().checkCoupon(couponData);
 
 		try {
@@ -98,8 +100,8 @@ public class CompanyServicesImpl implements CompanyServices {
 
 	}
 	@Override
-	public ResponseMassageEnum updateCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException {
-		logInCheck(couponData, LogInEnum.NOTLOGEDIN);
+	public ResponseMassageEnum updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException {
+		logInCheck(couponData);
 		new CheckClientRequest().checkCoupon(couponData);
 
 		Coupon couponfromDataBase = couponDao.findCouponById(couponData.getCoupon().getId());
@@ -116,8 +118,8 @@ public class CompanyServicesImpl implements CompanyServices {
 	
 	}
 
-	public List<Coupon> listAllCoupons(RequestData idData) throws RequestDataIsNullException, notLogedInException {
-		logInCheck(idData, LogInEnum.NOTLOGEDIN);
+	public List<Coupon> listAllCoupons(RequestData idData) throws RequestDataIsNullException, NotLogedInException {
+		logInCheck(idData);
 
 		
 		return (List<Coupon>) couponDao.findAll();
@@ -125,8 +127,8 @@ public class CompanyServicesImpl implements CompanyServices {
 	}
 
 	@Override
-	public Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, notLogedInException {
-		logInCheck(couponData, LogInEnum.NOTLOGEDIN);
+	public Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException {
+		logInCheck(couponData);
 		Coupon couponfromDataBase = couponDao.findCouponById(couponData.getCoupon().getId());
 		NullCheck.checkIfItIsNull(couponfromDataBase, ResponseMassageEnum.COUPONNOTFOUND.toString());
 		if (!couponfromDataBase.getTitle().trim().equals(couponData.getCoupon().getTitle().trim())) {
@@ -135,15 +137,53 @@ public class CompanyServicesImpl implements CompanyServices {
 		couponDao.delete(couponfromDataBase);
 		return couponfromDataBase;
 	}
+	
+	public Set<Coupon> getSpecificCouponsForCumpany(RequestData SpecificCouponData)
+			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
+		logInCheck(SpecificCouponData);
+		SpecificCouponData couponData = SpecificCouponData.getSpecificCouponData();
+		Company company  = logInedCompanys.get(SpecificCouponData.getClientId());
+		Set<Coupon> coupons = company.getCoupons();
+		NullCheck.checkIfItIsNull(coupons, "there is no coupons for this customer");
+		if (coupons.size() >0) {
+		if (couponData.getCouponType() !=null) {
+			
+			Set<Coupon> specificCoupons = new HashSet<>();
+			for (Coupon coupon : coupons) {
+				if(coupon.getCouponType().equals(couponData.getCouponType()));
+				specificCoupons.add(coupon);
+			}
+			return specificCoupons;
+		}
+		if (couponData.getPrice() != null) {
+			Set<Coupon> specificCoupons = new HashSet<>();
+			for (Coupon coupon : coupons) {
+				if(coupon.getPrice() >= couponData.getPrice());
+				specificCoupons.add(coupon);
+			}
+			return specificCoupons;
+		} 		
+		if (couponData.getEndDate() != null) {
+			Set<Coupon> specificCoupons = new HashSet<>();
+			for (Coupon coupon : coupons) {
+				if(coupon.getEndDate().isBefore(couponData.getEndDate()) || 
+						coupon.getEndDate().isEqual(couponData.getEndDate()));
+				specificCoupons.add(coupon);
+			}
+			return specificCoupons;
+		} 		
+		}
+		return null;
+	}
 
-	private void logInCheck(RequestData requestData, LogInEnum notlogedin) throws notLogedInException, RequestDataIsNullException {
+	private void logInCheck(RequestData requestData) throws NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(requestData, "your request is empty ");
 		try {
 			if (!this.logInedCompanys.containsKey(requestData.getClientId())) {
-				throw new notLogedInException(notlogedin.toString());
+				throw new NotLogedInException(LogInEnum.NOTLOGEDIN.toString());
 			}
 		} catch (Exception e) {
-			throw new notLogedInException("please log in to do this task id is null", e);
+			throw new NotLogedInException("please log in to do this task id is null", e);
 		}
 
 	}

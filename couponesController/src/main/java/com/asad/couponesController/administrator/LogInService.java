@@ -7,7 +7,7 @@ import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 public interface LogInService  {
 

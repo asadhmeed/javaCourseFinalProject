@@ -21,7 +21,7 @@ import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 @RequestMapping("/customerRest")
 @RestController
@@ -41,22 +41,32 @@ public class CustomerRest implements CouponClaintREST {
 
 	@PostMapping("/customerLogOut")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException {
+	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException {
 		return new Response(customerServices.logout(Id));
 	}
 
 	@PostMapping("/purchaseCoupon")
 	public Response purchaseCoupon(@RequestBody RequestData customerData)
 			throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException,
-			IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, notLogedInException {
+			IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException {
 
 		return incomeServices.storeIncome(customerData, ClientType.CUSTOMER, ActionType.PURCHASE);
-		
 	}
 
 	@PostMapping("/listAllCustomerCoupons")
-	public Response listAllCustomerCoupons(RequestData customerId) throws IdIsNullException, ComponentNotFoundException, notLogedInException, RequestDataIsNullException {
+	public Response listAllCustomerCoupons(RequestData customerId) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 
-		return new Response(customerServices.getAllCouponForCustomer(customerId));
+		return new Response(customerServices.getAllCouponsForCustomer(customerId));
+	}
+	@PostMapping("/listCustomerCouponsByCouponTypeOrPrice")
+	public Response listCouponsByCouponTypeOrPrice(RequestData spesificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
+		
+		return new Response(customerServices.getSpecificCouponsForCustomer(spesificCouponData));
+	}
+	@PostMapping("/getSpecificCoupons")
+	public Response getSpecificCoupons(@RequestBody RequestData specificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException 
+	{
+		return new Response(customerServices.getSpecificCouponsForCustomer(specificCouponData));
+		
 	}
 }

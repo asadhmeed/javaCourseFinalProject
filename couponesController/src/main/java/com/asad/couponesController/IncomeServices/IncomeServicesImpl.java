@@ -22,7 +22,7 @@ import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 @Service
 public class IncomeServicesImpl implements IncomeServices {
@@ -38,7 +38,7 @@ public class IncomeServicesImpl implements IncomeServices {
 	
 
 	@Override
-	public Response storeIncome(RequestData requestData ,ClientType clientType,ActionType actionType) throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, notLogedInException, CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException {
+	public Response storeIncome(RequestData requestData ,ClientType clientType,ActionType actionType) throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException {
 		switch(clientType) {
 		case COMPANY:
 			switch(actionType) {

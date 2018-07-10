@@ -5,7 +5,7 @@ import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Customer;
 
 public class RequestData {
-	
+	private SpecificCouponData specificCouponData;
 	private Company company;
 	private Customer customer;
 	private Coupon coupon;
@@ -14,6 +14,12 @@ public class RequestData {
 	
 	
 	
+	public SpecificCouponData getSpecificCouponData() {
+		return specificCouponData;
+	}
+	public void setSpecificCouponData(SpecificCouponData specificCouponData) {
+		this.specificCouponData = specificCouponData;
+	}
 	public Company getCompany() {
 		return company;
 	}

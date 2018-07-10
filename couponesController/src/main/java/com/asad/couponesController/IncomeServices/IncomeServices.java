@@ -14,11 +14,11 @@ import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.IncomeIsNullException;
 import com.asad.couponesController.exceptions.NameIsUsedException;
 import com.asad.couponesController.exceptions.RequestDataIsNullException;
-import com.asad.couponesController.exceptions.notLogedInException;
+import com.asad.couponesController.exceptions.NotLogedInException;
 
 public interface IncomeServices {
 	Response storeIncome(RequestData requestData, ClientType clientType, ActionType actionType)
-			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, notLogedInException,
+			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException,
 			CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException;
 	List<Income> viewAllIncome();
 	List<Income> viewIncomeByCusomer(String name);
