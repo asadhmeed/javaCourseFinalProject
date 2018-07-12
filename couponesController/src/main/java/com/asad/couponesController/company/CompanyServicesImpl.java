@@ -1,11 +1,18 @@
 package com.asad.couponesController.company;
 
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +24,10 @@ import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.NullCheck;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.SpecificCouponData;
+import com.asad.couponesController.CouponDateCheck.DailyCouponExpirationTask;
 import com.asad.couponesController.coupons.CouponRepository;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
-import com.asad.couponesController.entitys.Customer;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
@@ -187,7 +194,16 @@ public class CompanyServicesImpl implements CompanyServices {
 		}
 
 	}
-
+	
+// TODO:check again if the method delete the coupons with real data base coupons
+	/**
+	 * check if there is any coupons out of date and deletes it
+	 */
+	@PostConstruct
+	private void DailyCouponCheck() {
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(); 		
+				executorService.scheduleWithFixedDelay(new  DailyCouponExpirationTask(this.couponDao), 0, 1, TimeUnit.DAYS);
+	}
 	
 
 }
