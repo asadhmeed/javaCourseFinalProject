@@ -13,6 +13,7 @@ public interface LogInService  {
 
 	
 	public LogInResponse logIn(LogIn logIn)  throws LogInDataIsNullException, RequestDataIsNullException;
-	public  ResponseMassageEnum logout(Long Id) throws  RequestDataIsNullException, IdIsNullException;
-	
+	public  ResponseMassageEnum logout(RequestData IdData) throws  RequestDataIsNullException, IdIsNullException, NotLogedInException;
+	public String getClientName(Long clientId) throws NotLogedInException;
 }
+;

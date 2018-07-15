@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.asad.couponesController.RequestData;
+
 import com.asad.couponesController.administrator.LogInService;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.enums.ResponseMassageEnum;
@@ -19,6 +20,6 @@ public interface CompanyServices extends LogInService {
 	 Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException;
 	 Set<Coupon> getSpecificCouponsForCumpany(RequestData SpecificCouponData)throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException;
 		
-	List<Coupon> listAllCoupons(RequestData idData) throws RequestDataIsNullException, NotLogedInException;
-	ResponseMassageEnum updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException;
+	Set<Coupon> listAllCouponsForSpecificCompany(RequestData idData) throws RequestDataIsNullException, NotLogedInException;
+	ResponseMassageEnum updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException, ComponentNotFoundException;
 }

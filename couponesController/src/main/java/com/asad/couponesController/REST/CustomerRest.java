@@ -32,7 +32,7 @@ public class CustomerRest implements CouponClaintREST {
 	@Autowired
 	private IncomeServices incomeServices;
 
-	@PostMapping("/logIn")
+	@PostMapping("/customerlogIn")
 	@Override
 	public Response logIn(@RequestBody LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
 
@@ -41,14 +41,14 @@ public class CustomerRest implements CouponClaintREST {
 
 	@PostMapping("/customerLogOut")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException {
-		return new Response(customerServices.logout(Id));
+	public synchronized Response logout(@RequestBody RequestData IdData) throws IdIsNullException, RequestDataIsNullException, NotLogedInException {
+		return new Response(customerServices.logout(IdData));
 	}
 
 	@PostMapping("/purchaseCoupon")
 	public Response purchaseCoupon(@RequestBody RequestData customerData)
 			throws CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException,
-			IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException {
+			IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException, ComponentNotFoundException {
 
 		return incomeServices.storeIncome(customerData, ClientType.CUSTOMER, ActionType.PURCHASE);
 	}
@@ -58,7 +58,7 @@ public class CustomerRest implements CouponClaintREST {
 
 		return new Response(customerServices.getAllCouponsForCustomer(customerId));
 	}
-	@PostMapping("/listCustomerCouponsByCouponTypeOrPrice")
+	@PostMapping("/getCouponsByCouponTypeOrPrice")
 	public Response listCouponsByCouponTypeOrPrice(RequestData spesificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		
 		return new Response(customerServices.getSpecificCouponsForCustomer(spesificCouponData));

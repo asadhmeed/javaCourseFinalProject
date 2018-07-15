@@ -37,6 +37,12 @@ public class Response {
 	public void setResponseMessage(String responseMessage) {
 		this.responseMessage = responseMessage;
 	}
+
+
+	@Override
+	public String toString() {
+		return "Response [response=" + response + ", responseMessage=" + responseMessage + "]";
+	}
 	
 	
 	

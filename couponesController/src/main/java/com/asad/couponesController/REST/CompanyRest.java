@@ -45,7 +45,7 @@ public class CompanyRest implements CouponClaintREST {
 	private IncomeServices incomeServices;
 
 	@Override
-	@GetMapping("/logIn")
+	@PostMapping("/companylogIn")
 	public synchronized Response logIn(@RequestBody LogIn logIn)throws LogInDataIsNullException, RequestDataIsNullException  {
 							           
 		
@@ -54,13 +54,13 @@ public class CompanyRest implements CouponClaintREST {
 
 	@PostMapping("/companyLogOut")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException
+	public synchronized Response logout(@RequestBody RequestData IdData) throws IdIsNullException, RequestDataIsNullException, NotLogedInException
 	{
-		return new Response(companyServices.logout(Id));
+		return new Response(companyServices.logout(IdData));
 	}
 	@PostMapping("/creatCoupon")
 	public Response creatCoupon(@RequestBody RequestData couponData) throws NameIsUsedException //couponCreated
-, RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, IdIsNullException, CustomerPurchaseDataException
+, RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException
 	{
 		AppLogger.getLogger().log(Level.CONFIG, couponData.toString());
 //		return new Response(companyServices.creatCoupon(coupon));
@@ -68,24 +68,24 @@ public class CompanyRest implements CouponClaintREST {
 	}
 	
 	
-	@DeleteMapping("/deleteCoupon")
+	@PostMapping("/deleteCoupon")
 	public Response deleteCoupon(@RequestBody RequestData couponData) throws RequestDataIsNullException, NotLogedInException //couponDeleted
 	{
 		
 		return new Response(companyServices.deleteCoupon(couponData));
 	}
 	@PostMapping("/updateCoupon")
-	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, NameIsUsedException, IdIsNullException, CustomerPurchaseDataException 
+	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, NameIsUsedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException 
 	{
 		return incomeServices.storeIncome(couponData, ClientType.COMPANY, ActionType.UPDATE);
 		//		return new Response(companyServices.updateCoupon(couponData));
 	}
 	
-	@GetMapping("/listAllCoupons")
+	@PostMapping("/listAllCoupons")
 	public Response listAllCoupons(@RequestBody RequestData couponData) throws RequestDataIsNullException, NotLogedInException 
 	{
 		
-		return new Response(companyServices.listAllCoupons(couponData));
+		return new Response(companyServices.listAllCouponsForSpecificCompany(couponData));
 	}
 	@PostMapping("/getSpecificCoupons")
 	public Response getSpecificCoupons(@RequestBody RequestData specificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException 

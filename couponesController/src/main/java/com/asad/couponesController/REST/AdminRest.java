@@ -35,8 +35,7 @@ public class AdminRest implements CouponClaintREST {
 
 	@Autowired
 	private AdministratorServices admin;
-	@Autowired
-	private IncomeServices income;
+	
 
 	@PostMapping("/adminlogIn")
 	@Override
@@ -46,8 +45,8 @@ public class AdminRest implements CouponClaintREST {
 
 	@PostMapping("/adminLogout")
 	@Override
-	public synchronized Response logout(Long Id) throws IdIsNullException, RequestDataIsNullException {
-		return new Response(admin.logout(Id));
+	public synchronized Response logout(@RequestBody RequestData IdData) throws IdIsNullException, RequestDataIsNullException, NotLogedInException {
+		return new Response(admin.logout(IdData));
 	}
 
 	// Companies--------------------------------------------------
@@ -79,7 +78,7 @@ public class AdminRest implements CouponClaintREST {
 
 	@PostMapping("/getCompany")
 	public Response getCompanyByName(@RequestBody RequestData companyRequestData)
-			throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
+			throws IdIsNullException, NotLogedInException, RequestDataIsNullException, ComponentNotFoundException {
 
 		return new Response(admin.getCompanyById(companyRequestData));
 	}
@@ -107,7 +106,7 @@ public class AdminRest implements CouponClaintREST {
 	public Response updateCustomer(@RequestBody RequestData customerRequestData) throws ComponentNotFoundException // CustomerUpdated
 			, NotLogedInException, RequestDataIsNullException {
 
-		return new Response(admin.deleteCustomer(customerRequestData));
+		return new Response(admin.updateCustomer(customerRequestData));
 	}
 
 	@PostMapping("/listAllCustomers")
@@ -118,7 +117,7 @@ public class AdminRest implements CouponClaintREST {
 
 	@PostMapping("/getCustomer")
 	public Response getCustomerById(@RequestBody RequestData customerRequestData)
-			throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
+			throws IdIsNullException, NotLogedInException, RequestDataIsNullException, ComponentNotFoundException {
 
 		return new Response(admin.getCustomerById(customerRequestData));
 	}
