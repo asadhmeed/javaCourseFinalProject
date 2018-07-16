@@ -18,7 +18,7 @@ public class SpecificCouponData {
 		return couponType;
 	}
 	public void setCouponType(CouponType couponType) {
-		couponType = couponType;
+		this.couponType = couponType;
 	}
 	public Double getPrice() {
 		return price;

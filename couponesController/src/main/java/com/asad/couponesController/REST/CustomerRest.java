@@ -54,12 +54,12 @@ public class CustomerRest implements CouponClaintREST {
 	}
 
 	@PostMapping("/listAllCustomerCoupons")
-	public Response listAllCustomerCoupons(RequestData customerId) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
+	public Response listAllCustomerCoupons(@RequestBody RequestData customerId) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 
 		return new Response(customerServices.getAllCouponsForCustomer(customerId));
 	}
 	@PostMapping("/getCouponsByCouponTypeOrPrice")
-	public Response listCouponsByCouponTypeOrPrice(RequestData spesificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
+	public Response listCouponsByCouponTypeOrPrice(@RequestBody RequestData spesificCouponData) throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		
 		return new Response(customerServices.getSpecificCouponsForCustomer(spesificCouponData));
 	}

@@ -50,6 +50,7 @@ public class CustomerServicesImpl implements CustomerServices {
 		NullCheck.checkIfItIsNull(logIn, "your request is empty ");
 		if (logIn.getUserId() == null) {
 			Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
+			
 			if (customer != null) {
 				for (Long customerInMapId : logedInCustomers.keySet()) {
 					if (customer.getId().equals(logedInCustomers.get(customerInMapId).getId())) {
@@ -109,7 +110,7 @@ public class CustomerServicesImpl implements CustomerServices {
 				customerDao.save(customer);
 				Long customerId = couponData.getClientId();
 				this.logedInCustomers.remove(customerId);
-				this.logedInCustomers.put(customerId, customer);
+				this.logedInCustomers.put(customerId, customerDao.findCustomerById(customer.getId()));
 
 				return couponData.getCoupon();
 			} else {
@@ -125,10 +126,8 @@ public class CustomerServicesImpl implements CustomerServices {
 	public Set<Coupon> getAllCouponsForCustomer(RequestData customerData)
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(customerData);
-		NullCheck.checkIfItIsNull(customerData.getCustomer(), "customer data is empty");
-		Long customerId = customerData.getClientId();
-		NullCheck.checkIfItIsNull(customerId, LogInEnum.NOTLOGEDIN.toString());
-		Customer customer = logedInCustomers.get(customerId);
+		
+		Customer customer = logedInCustomers.get(customerData.getClientId());
 		if (customer != null) {
 			return customer.getCoupons();
 		} else {
@@ -157,29 +156,34 @@ public class CustomerServicesImpl implements CustomerServices {
 		SpecificCouponData couponData = SpecificCouponData.getSpecificCouponData();
 		Customer customer = logedInCustomers.get(SpecificCouponData.getClientId());
 		Set<Coupon> coupons = customer.getCoupons();
-		NullCheck.checkIfItIsNull(coupons, "there is no coupons for this customer");
+		NullCheck.checkIfItIsNull(coupons,  ResponseMassageEnum.COUPONSAREZEROFORTHISCOMPANY.toString());
 		if (coupons.size() > 0) {
 			if (couponData.getCouponType() != null) {
 
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
-					if (coupon.getCouponType().equals(couponData.getCouponType()))
-						;
+					if (coupon.getCouponType().equals(couponData.getCouponType())) {
 					specificCoupons.add(coupon);
+					}
 				}
 				return specificCoupons;
 			}
 			if (couponData.getPrice() != null) {
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
-					if (coupon.getPrice() == couponData.getPrice())
-						;
+					//TODO:log
+					AppLogger.getLogger().log(Level.INFO, coupon.getPrice() +" <= "+couponData.getPrice());
+					if (coupon.getPrice() <= couponData.getPrice()) {
 					specificCoupons.add(coupon);
 				}
 				return specificCoupons;
 			}
+			}
+		}else {
+			throw new ComponentNotFoundException(ResponseMassageEnum.COUPONLISTISEMPTY.toString());
+			
 		}
-		return null;
+		throw new RequestDataIsNullException(ResponseMassageEnum.SPESIFICCOUPONDATAISNOTVALID.toString());
 	}
 
 	@Override

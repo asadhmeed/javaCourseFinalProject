@@ -48,8 +48,12 @@ public class CompanyServicesImpl implements CompanyServices {
 	@Override
 	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
 		new CheckClientRequest().checkLogIn(logIn);
+		AppLogger.getLogger().log(Level.INFO, logIn.getUserId()+"");
 		
+
 		if (logIn.getUserId() != null && logedInCompanies.get(logIn.getUserId()) != null) {
+			AppLogger.getLogger().log(Level.INFO, " in the first if");
+
 			return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
 		} else {
 
@@ -57,10 +61,10 @@ public class CompanyServicesImpl implements CompanyServices {
 				return new LogInResponse(LogInEnum.USERIDISNOTVALID);
 			}
 			Company company = companyDao.findCompanyByCompanyNameAndPassword(logIn.getUserName(), logIn.getPassword());
-			
+
 			if (company != null) {
 				for (Company companyInList : logedInCompaniesList) {
-					
+
 					if (company.getId().equals(companyInList.getId())) {
 						return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
 					}
@@ -68,8 +72,10 @@ public class CompanyServicesImpl implements CompanyServices {
 				Long id = LoginIdGenerator.generateId();
 				logedInCompanies.put(id, company);
 				logedInCompaniesList.add(company);
-//				TODO: log 
+				// TODO: log
 				AppLogger.getLogger().log(Level.INFO, this.logedInCompaniesList.toString());
+				// TODO: log
+				AppLogger.getLogger().log(Level.INFO, id.toString());
 				return new LogInResponse(LogInEnum.LOGINSUCCESS, id);
 			} else {
 				return new LogInResponse(LogInEnum.LOGINFAILED);
@@ -79,23 +85,26 @@ public class CompanyServicesImpl implements CompanyServices {
 	}
 
 	@Override
-	public ResponseMassageEnum logout(RequestData idData) throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
+	public ResponseMassageEnum logout(RequestData idData)
+			throws IdIsNullException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(idData);
-		
-			for (Long id1 : logedInCompanies.keySet()) {
-				if (idData.getClientId() == id1) {
-					logedInCompanies.remove(idData.getClientId());
-					return ResponseMassageEnum.LOGOUTSUCCESS;
-				}
+		AppLogger.getLogger().log(Level.INFO, idData.getClientId()+"");
+		for (Long id1 : logedInCompanies.keySet()) {
+			if (idData.getClientId() == id1) {
+				logedInCompaniesList.remove(logedInCompanies.get(idData.getClientId()));
+				logedInCompanies.remove(idData.getClientId());
+				
+				return ResponseMassageEnum.LOGOUTSUCCESS;
 			}
-		
+		}
+
 		return ResponseMassageEnum.LOGOUTFAILED;
 
 	}
 
-	public Coupon creatCoupon(RequestData couponData)
+	public synchronized Coupon creatCoupon(RequestData couponData)
 			throws NameIsUsedException, RequestDataIsNullException, NotLogedInException {
-		//TODO:log 
+		// TODO:log
 		AppLogger.getLogger().log(Level.INFO, couponData.getCoupon().toString());
 		logInCheck(couponData);
 		new CheckClientRequest().checkCoupon(couponData);
@@ -103,11 +112,14 @@ public class CompanyServicesImpl implements CompanyServices {
 		try {
 			Company company = logedInCompanies.get(couponData.getClientId());
 			Set<Coupon> coupons = company.getCoupons();
-			coupons.add( couponData.getCoupon());
+			couponDao.save(couponData.getCoupon());
 
+			
+			coupons.add(couponDao.findCouponByTitle(couponData.getCoupon().getTitle()));
+			AppLogger.getLogger().log(Level.INFO,coupons.toString());
 			companyDao.save(company);
 			this.logedInCompanies.remove(couponData.getClientId());
-			this.logedInCompanies.put(couponData.getClientId(), company);
+			this.logedInCompanies.put(couponData.getClientId(), companyDao.findCompanyById(company.getId()));
 			return couponDao.findCouponByTitle(couponData.getCoupon().getTitle());
 		} catch (Exception e) {
 
@@ -121,31 +133,48 @@ public class CompanyServicesImpl implements CompanyServices {
 	@Override
 	public ResponseMassageEnum updateCoupon(RequestData couponData)
 			throws RequestDataIsNullException, NotLogedInException, ComponentNotFoundException {
+		AppLogger.getLogger().log(Level.INFO, couponData.toString());
 		logInCheck(couponData);
 		new CheckClientRequest().checkCoupon(couponData);
 		Set<Coupon> companyCoupons = this.logedInCompanies.get(couponData.getClientId()).getCoupons();
-		if (!companyCoupons.contains(couponData.getCoupon())){
-			throw new ComponentNotFoundException("the coupon you want ot update is not yours");
-		}
+		
 		Coupon couponfromDataBase = couponDao.findCouponById(couponData.getCoupon().getId());
-		 
-		if (couponfromDataBase == null) {
-			return ResponseMassageEnum.COUPONNOTFOUND;
-		} else {
-			if (couponData.getCoupon().getEndDate()!= null) {
+
+		NullCheck.checkIfItIsNull(couponfromDataBase, ResponseMassageEnum.COUPONNOTFOUND.toString());
+		checkIfCompanyCouponIsValid(couponData, companyCoupons);
+
+			if (!couponfromDataBase.getTitle().trim().equals(couponData.getCoupon().getTitle().trim())) {
+				throw new RequestDataIsNullException(ResponseMassageEnum.COMPANYNAMEMOSTNOTCHANGE.toString());
+			}
+			if (couponData.getCoupon().getEndDate() != null) {
 				couponfromDataBase.setEndDate(couponData.getCoupon().getEndDate());
 			}
-			if (couponData.getCoupon().getPrice()!= null) {
+			if (couponData.getCoupon().getPrice() != null) {
 				couponfromDataBase.setPrice(couponData.getCoupon().getPrice());
 			}
 			couponDao.save(couponfromDataBase);
-			
+
 			return ResponseMassageEnum.THECOUPONUPDATED;
-		}
+		
 
 	}
 
-	public Set<Coupon> listAllCouponsForSpecificCompany(RequestData idData) throws RequestDataIsNullException, NotLogedInException {
+	private void checkIfCompanyCouponIsValid(RequestData couponData, Set<Coupon> companyCoupons)
+			throws RequestDataIsNullException {
+		boolean couponIsInTheCompanyCouponList = false;
+		for (Coupon coupon : companyCoupons) {
+			if (coupon.getId().equals(couponData.getCoupon().getId())) {
+				couponIsInTheCompanyCouponList = true;
+			}
+
+		}
+		if (!couponIsInTheCompanyCouponList) {
+			throw new RequestDataIsNullException(ResponseMassageEnum.COUPONISNOTYOURS.toString());
+		}
+	}
+
+	public Set<Coupon> listAllCouponsForSpecificCompany(RequestData idData)
+			throws RequestDataIsNullException, NotLogedInException {
 		logInCheck(idData);
 		return logedInCompanies.get(idData.getClientId()).getCoupons();
 
@@ -155,48 +184,48 @@ public class CompanyServicesImpl implements CompanyServices {
 	public Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException {
 		logInCheck(couponData);
 		Company company = this.logedInCompanies.get(couponData.getClientId());
-		boolean couponIsInTheCompanyCouponList = false;
-		for (Coupon coupon : company.getCoupons()) {
-			if (coupon.getId().equals(couponData.getCoupon().getId())) {
-				couponIsInTheCompanyCouponList =true;
-			}
-		}
-		if (!couponIsInTheCompanyCouponList) {
-			throw new RequestDataIsNullException(ResponseMassageEnum.COUPONISNOTYOURS.toString());
-			}
+
 		Coupon couponfromDataBase = couponDao.findCouponById(couponData.getCoupon().getId());
 		NullCheck.checkIfItIsNull(couponfromDataBase, ResponseMassageEnum.COUPONNOTFOUND.toString());
+		checkIfCompanyCouponIsValid(couponData, company.getCoupons());
 		if (!couponfromDataBase.getTitle().trim().equals(couponData.getCoupon().getTitle().trim())) {
 			throw new RequestDataIsNullException("COUPONSTITLEISNOTMATCH");
 		}
 		couponDao.delete(couponfromDataBase);
+		
+		AppLogger.getLogger().log(Level.INFO, company.getCoupons().toString());
+		//TODO:fix the bug in the company coupon table and the company in the companyMap 
 		return couponfromDataBase;
 	}
-//TODO: continue testing
-	public Set<Coupon> getSpecificCouponsForCumpany(RequestData SpecificCouponData)
+
+
+	public Set<Coupon> getSpecificCouponsForCumpany(RequestData specificCouponData)
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
-		logInCheck(SpecificCouponData);
-		SpecificCouponData couponData = SpecificCouponData.getSpecificCouponData();
-		Company company = logedInCompanies.get(SpecificCouponData.getClientId());
+		logInCheck(specificCouponData);
+		SpecificCouponData couponData = specificCouponData.getSpecificCouponData();
+		Company company = logedInCompanies.get(specificCouponData.getClientId());
 		Set<Coupon> coupons = company.getCoupons();
-		NullCheck.checkIfItIsNull(coupons, "there is no coupons for this customer");
+		NullCheck.checkIfItIsNull(coupons, ResponseMassageEnum.COUPONSAREZEROFORTHISCOMPANY.toString());
 		if (coupons.size() > 0) {
 			if (couponData.getCouponType() != null) {
 
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
-					if (coupon.getCouponType().equals(couponData.getCouponType()))
-						;
-					specificCoupons.add(coupon);
+					if (coupon.getCouponType().toString().equals(couponData.getCouponType().toString())) {
+
+						specificCoupons.add(coupon);
+					}
 				}
 				return specificCoupons;
 			}
 			if (couponData.getPrice() != null) {
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
-					if (coupon.getPrice() >= couponData.getPrice())
-						;
-					specificCoupons.add(coupon);
+					if (coupon.getPrice() >= couponData.getPrice()) {
+
+						specificCoupons.add(coupon);
+					}
+
 				}
 				return specificCoupons;
 			}
@@ -204,21 +233,18 @@ public class CompanyServicesImpl implements CompanyServices {
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
 					if (coupon.getEndDate().isBefore(couponData.getEndDate())
-							|| coupon.getEndDate().isEqual(couponData.getEndDate()))
-						;
-					specificCoupons.add(coupon);
+							|| coupon.getEndDate().isEqual(couponData.getEndDate())) {
+						
+						specificCoupons.add(coupon);
+					}
 				}
 				return specificCoupons;
 			}
 		}
-		return null;
+		throw new RequestDataIsNullException(ResponseMassageEnum.SPESIFICCOUPONDATAISNOTVALID.toString());
+
 	}
 
-	
-	
-	
-	
-	
 	private void logInCheck(RequestData requestData) throws NotLogedInException, RequestDataIsNullException {
 		AppLogger.getLogger().log(Level.INFO, "log in Check");
 
@@ -247,9 +273,9 @@ public class CompanyServicesImpl implements CompanyServices {
 	@Override
 	public String getClientName(Long clientId) throws NotLogedInException {
 		try {
-		if (!this.logedInCompanies.containsKey(clientId)) {
-			throw new NotLogedInException(LogInEnum.NOTLOGEDIN.toString());
-		}
+			if (!this.logedInCompanies.containsKey(clientId)) {
+				throw new NotLogedInException(LogInEnum.NOTLOGEDIN.toString());
+			}
 		} catch (Exception e) {
 			throw new NotLogedInException(LogInEnum.NOTLOGEDIN.toString(), e);
 		}

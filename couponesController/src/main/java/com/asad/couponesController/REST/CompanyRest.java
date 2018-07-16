@@ -75,7 +75,7 @@ public class CompanyRest implements CouponClaintREST {
 		return new Response(companyServices.deleteCoupon(couponData));
 	}
 	@PostMapping("/updateCoupon")
-	public Response updateCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, NameIsUsedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException 
+	public Response updateCoupon(@RequestBody RequestData couponData) throws RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IncomeIsNullException, NameIsUsedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException 
 	{
 		return incomeServices.storeIncome(couponData, ClientType.COMPANY, ActionType.UPDATE);
 		//		return new Response(companyServices.updateCoupon(couponData));

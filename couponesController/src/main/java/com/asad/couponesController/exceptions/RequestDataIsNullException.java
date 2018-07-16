@@ -1,5 +1,7 @@
 package com.asad.couponesController.exceptions;
 
+import com.asad.couponesController.enums.ResponseMassageEnum;
+
 public class RequestDataIsNullException extends Exception {
 
 	public RequestDataIsNullException(String arg0, Throwable arg1) {
@@ -17,5 +19,6 @@ public class RequestDataIsNullException extends Exception {
 	
 	}
 
+	
 	
 }
