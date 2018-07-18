@@ -13,7 +13,6 @@ import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
 import com.asad.couponesController.company.CompanyServices;
 import com.asad.couponesController.customer.CustomerServices;
-import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Income;
 import com.asad.couponesController.enums.ActionType;
 import com.asad.couponesController.enums.ClientType;
@@ -37,49 +36,51 @@ public class IncomeServicesImpl implements IncomeServices {
 	@Autowired
 	private CustomerServices customerServices;
 
-	
-	
-
 	@Override
-	public Response storeIncome(RequestData requestData ,ClientType clientType,ActionType actionType ) throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException, CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException {
-		switch(clientType) {
+	public Response storeIncome(RequestData requestData, ClientType clientType, ActionType actionType)
+			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException,
+			CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException,
+			ComponentNotFoundException {
+		switch (clientType) {
 		case COMPANY:
-			switch(actionType) {
+			switch (actionType) {
 			case CREAT:
 				Response CreatResponse = new Response(companyServices.creatCoupon(requestData));
 				AppLogger.getLogger().log(Level.INFO, CreatResponse.toString());
-				if(CreatResponse.getResponse()!=null) {
-					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(), IncomeType.COMPANY_NEW_COUPON,100d ));
+				if (CreatResponse.getResponse() != null) {
+					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(),
+							IncomeType.COMPANY_NEW_COUPON, 100d));
 				}
 				return CreatResponse;
-			
-			case UPDATE:	
+
+			case UPDATE:
 				Response UpdateResponse = new Response(companyServices.updateCoupon(requestData));
-				if(UpdateResponse.getResponse()!=null) {
-					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(), IncomeType.COMPANY_UPDATE_COUPON,10d ));
+				if (UpdateResponse.getResponse() != null) {
+					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(),
+							IncomeType.COMPANY_UPDATE_COUPON, 10d));
 
 				}
 				return UpdateResponse;
 			default:
 				break;
-			
-		
+
 			}
 			break;
 		case CUSTOMER:
-			switch(actionType) {
+			switch (actionType) {
 			case PURCHASE:
 				Response PurchaseResponse = new Response(customerServices.beyACoupon(requestData));
-				if(PurchaseResponse.getResponse()!=null) {
-					incomeDao.save(new Income(customerServices.getClientName(requestData.getClientId()), LocalDate.now(), IncomeType.CUSTOMER_PURCHASE,requestData.getCoupon().getPrice() ));
+				if (PurchaseResponse.getResponse() != null) {
+					incomeDao.save(new Income(customerServices.getClientName(requestData.getClientId()),
+							LocalDate.now(), IncomeType.CUSTOMER_PURCHASE, requestData.getCoupon().getPrice()));
 				}
 				return PurchaseResponse;
-	
+
 			}
 			break;
 		}
 		return new Response(new IncomeIsNullException("ACTIONNOTALLOWED"));
-	
+
 	}
 
 	@Override
@@ -89,15 +90,10 @@ public class IncomeServicesImpl implements IncomeServices {
 	}
 
 	@Override
-	public List<Income> viewIncomeByCusomer(String name) {
+	public List<Income> viewIncomeByClientNameAndIncomeType(String name, IncomeType incomeType) {
 
-		return incomeDao.findByName(name);
-	}
+		return incomeDao.findByIncomeTypeAndName(incomeType, name);
 
-	@Override
-	public List<Income> viewIncomeByCompany(String name) {
-
-		return incomeDao.findByName(name);
 	}
 
 }

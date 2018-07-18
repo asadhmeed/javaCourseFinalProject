@@ -22,10 +22,13 @@ import com.asad.couponesController.NullCheck;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.SpecificCouponData;
 import com.asad.couponesController.CouponDateCheck.DailyCouponExpirationTask;
+import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.coupons.CouponRepository;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
+import com.asad.couponesController.entitys.Income;
 import com.asad.couponesController.enums.CheckClientRequestEnum;
+import com.asad.couponesController.enums.IncomeType;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
@@ -44,6 +47,10 @@ public class CompanyServicesImpl implements CompanyServices {
 	private CouponRepository couponDao;
 	@Autowired
 	private CompanyRepository companyDao;
+	
+	@Autowired
+	private IncomeServices incomeServices;
+	
 
 	@Override
 	public LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
@@ -191,13 +198,38 @@ public class CompanyServicesImpl implements CompanyServices {
 		if (!couponfromDataBase.getTitle().trim().equals(couponData.getCoupon().getTitle().trim())) {
 			throw new RequestDataIsNullException("COUPONSTITLEISNOTMATCH");
 		}
+		Set<Coupon> coupons =company.getCoupons();
+		coupons.remove(couponData.getCoupon());
+		AppLogger.getLogger().log(Level.INFO, coupons.toString());
+		company.setCoupons(coupons);
 		couponDao.delete(couponfromDataBase);
+//		companyDao.save(company);
+		
+		
+		
+		this.logedInCompaniesList.remove(this.logedInCompanies.get(couponData.getClientId()));
+		this.logedInCompanies.remove(couponData.getClientId());
+		this.logedInCompanies.put(couponData.getClientId(), companyDao.findCompanyById(company.getId()));
+		this.logedInCompaniesList.add(this.logedInCompanies.get(couponData.getClientId()));
+		
 		
 		AppLogger.getLogger().log(Level.INFO, company.getCoupons().toString());
 		//TODO:fix the bug in the company coupon table and the company in the companyMap 
 		return couponfromDataBase;
 	}
-
+		
+	@Override
+	public List<Income> viewCompanyIncome(RequestData companyData) throws NotLogedInException, RequestDataIsNullException {
+		logInCheck(companyData);
+		
+		Company company = logedInCompanies.get(companyData.getClientId());
+		NullCheck.checkIfItIsNull(company, ResponseMassageEnum.COMPANYNOTFOUND.toString());
+		
+		List<Income> companyIncomes = incomeServices.viewIncomeByClientNameAndIncomeType(company.getCompanyName(), IncomeType.COMPANY_NEW_COUPON);
+		companyIncomes.addAll(incomeServices.viewIncomeByClientNameAndIncomeType(company.getCompanyName(), IncomeType.COMPANY_UPDATE_COUPON));
+		
+		return companyIncomes;
+	}
 
 	public Set<Coupon> getSpecificCouponsForCumpany(RequestData specificCouponData)
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {

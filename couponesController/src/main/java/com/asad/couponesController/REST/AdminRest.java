@@ -1,26 +1,14 @@
 package com.asad.couponesController.REST;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.asad.couponesController.LogIn;
-import com.asad.couponesController.LogInResponse;
-import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
-import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.administrator.AdministratorServices;
-import com.asad.couponesController.company.CompanyServices;
-import com.asad.couponesController.customer.CustomerServices;
-import com.asad.couponesController.entitys.Company;
-import com.asad.couponesController.entitys.Customer;
-import com.asad.couponesController.enums.LogInEnum;
-import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
 import com.asad.couponesController.exceptions.LogInDataIsNullException;
@@ -121,5 +109,24 @@ public class AdminRest implements CouponClaintREST {
 
 		return new Response(admin.getCustomerById(customerRequestData));
 	}
+	@PostMapping("/getCustomerIncome")
+	public Response getCustoemrIncome(@RequestBody RequestData customerData)
+			throws NotLogedInException, RequestDataIsNullException {
+		return new Response(admin.viewSpesificCustomerIncome(customerData));
+
+	}
+	@PostMapping("/getCompanyIncome")
+	public Response getCompanyIncome(@RequestBody RequestData companyData)
+			throws NotLogedInException, RequestDataIsNullException {
+		return new Response(admin.viewSpesificCompanyIncome(companyData));
+		
+	}
+	@PostMapping("/getAllIncome")
+	public Response getAllIncome(@RequestBody RequestData requestData)
+			throws NotLogedInException, RequestDataIsNullException {
+		return new Response(admin.viewAllIncome(requestData));
+		
+	}
+	
 
 }

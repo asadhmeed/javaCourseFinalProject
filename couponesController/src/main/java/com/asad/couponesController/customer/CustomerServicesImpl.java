@@ -3,29 +3,27 @@ package com.asad.couponesController.customer;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.SpecificCouponData;
+import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.LogInResponse;
 import com.asad.couponesController.LoginIdGenerator;
 import com.asad.couponesController.NullCheck;
-import com.asad.couponesController.IncomeServices.IncomeServices;
 import com.asad.couponesController.AppLogger;
 import com.asad.couponesController.CheckClientRequest;
 import com.asad.couponesController.coupons.CouponRepository;
+import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Customer;
-import com.asad.couponesController.enums.ActionType;
-import com.asad.couponesController.enums.CheckClientRequestEnum;
-import com.asad.couponesController.enums.ClientType;
-import com.asad.couponesController.enums.CouponType;
+import com.asad.couponesController.entitys.Income;
+import com.asad.couponesController.enums.IncomeType;
 import com.asad.couponesController.enums.LogInEnum;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
@@ -44,13 +42,15 @@ public class CustomerServicesImpl implements CustomerServices {
 	private CustomerRepository customerDao;
 	@Autowired
 	private CouponRepository couponDao;
+	@Autowired
+	private IncomeServices incomeServices;
 
 	@Override
 	public synchronized LogInResponse logIn(LogIn logIn) throws RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(logIn, "your request is empty ");
 		if (logIn.getUserId() == null) {
 			Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
-			
+
 			if (customer != null) {
 				for (Long customerInMapId : logedInCustomers.keySet()) {
 					if (customer.getId().equals(logedInCustomers.get(customerInMapId).getId())) {
@@ -60,7 +60,7 @@ public class CustomerServicesImpl implements CustomerServices {
 				Long logInPassCode = LoginIdGenerator.generateId();
 				logedInCustomers.put(logInPassCode, customer);
 				// TODO:log
-				AppLogger.getLogger().log(Level.INFO,customer.toString());
+				AppLogger.getLogger().log(Level.INFO, customer.toString());
 				return new LogInResponse(LogInEnum.LOGINSUCCESS, logInPassCode);
 			} else {
 				return new LogInResponse(LogInEnum.LOGINFAILED);
@@ -105,6 +105,7 @@ public class CustomerServicesImpl implements CustomerServices {
 				// Customer customerFromDb = customerDao.findCustomerByName(customer.getName());
 
 				Set<Coupon> coupons = customer.getCoupons();
+				// TODO:decrease the coupon amount in purchase coupon
 				coupons.add(dbCouponCheck);
 
 				customerDao.save(customer);
@@ -126,8 +127,8 @@ public class CustomerServicesImpl implements CustomerServices {
 	public Set<Coupon> getAllCouponsForCustomer(RequestData customerData)
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(customerData);
-		
-		Customer customer = logedInCustomers.get(customerData.getClientId());
+
+		Customer customer = customerDao.findCustomerById(logedInCustomers.get(customerData.getClientId()).getId());
 		if (customer != null) {
 			return customer.getCoupons();
 		} else {
@@ -154,16 +155,16 @@ public class CustomerServicesImpl implements CustomerServices {
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		logInCheck(SpecificCouponData);
 		SpecificCouponData couponData = SpecificCouponData.getSpecificCouponData();
-		Customer customer = logedInCustomers.get(SpecificCouponData.getClientId());
+		Customer customer = customerDao.findCustomerById(SpecificCouponData.getClientId());
 		Set<Coupon> coupons = customer.getCoupons();
-		NullCheck.checkIfItIsNull(coupons,  ResponseMassageEnum.COUPONSAREZEROFORTHISCOMPANY.toString());
+		NullCheck.checkIfItIsNull(coupons, ResponseMassageEnum.COUPONSAREZEROFORTHISCOMPANY.toString());
 		if (coupons.size() > 0) {
 			if (couponData.getCouponType() != null) {
 
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
 					if (coupon.getCouponType().equals(couponData.getCouponType())) {
-					specificCoupons.add(coupon);
+						specificCoupons.add(coupon);
 					}
 				}
 				return specificCoupons;
@@ -171,17 +172,17 @@ public class CustomerServicesImpl implements CustomerServices {
 			if (couponData.getPrice() != null) {
 				Set<Coupon> specificCoupons = new HashSet<>();
 				for (Coupon coupon : coupons) {
-					//TODO:log
-					AppLogger.getLogger().log(Level.INFO, coupon.getPrice() +" <= "+couponData.getPrice());
+					// TODO:log
+					AppLogger.getLogger().log(Level.INFO, coupon.getPrice() + " <= " + couponData.getPrice());
 					if (coupon.getPrice() <= couponData.getPrice()) {
-					specificCoupons.add(coupon);
+						specificCoupons.add(coupon);
+					}
+					return specificCoupons;
 				}
-				return specificCoupons;
 			}
-			}
-		}else {
+		} else {
 			throw new ComponentNotFoundException(ResponseMassageEnum.COUPONLISTISEMPTY.toString());
-			
+
 		}
 		throw new RequestDataIsNullException(ResponseMassageEnum.SPESIFICCOUPONDATAISNOTVALID.toString());
 	}

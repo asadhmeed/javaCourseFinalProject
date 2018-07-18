@@ -8,6 +8,7 @@ import com.asad.couponesController.Response;
 import com.asad.couponesController.entitys.Income;
 import com.asad.couponesController.enums.ActionType;
 import com.asad.couponesController.enums.ClientType;
+import com.asad.couponesController.enums.IncomeType;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.CouponIsAlreadyPurchasedException;
 import com.asad.couponesController.exceptions.CustomerPurchaseDataException;
@@ -22,7 +23,6 @@ public interface IncomeServices {
 			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException,
 			CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException;
 	List<Income> viewAllIncome();
-	List<Income> viewIncomeByCusomer(String name);
-	List<Income> viewIncomeByCompany(String name);
+	List<Income> viewIncomeByClientNameAndIncomeType(String name,IncomeType incomeType);
 	
 }

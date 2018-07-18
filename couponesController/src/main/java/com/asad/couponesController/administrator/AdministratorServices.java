@@ -5,6 +5,7 @@ import java.util.List;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Customer;
+import com.asad.couponesController.entitys.Income;
 import com.asad.couponesController.enums.ResponseMassageEnum;
 import com.asad.couponesController.exceptions.ComponentNotFoundException;
 import com.asad.couponesController.exceptions.IdIsNullException;
@@ -27,5 +28,7 @@ public interface AdministratorServices extends LogInService {
 	, RequestDataIsNullException;
 	List<Customer> listAllCustomers(RequestData adminData) throws NotLogedInException, RequestDataIsNullException;
 	Customer getCustomerById(RequestData customerRequestData) throws IdIsNullException, NotLogedInException, RequestDataIsNullException, ComponentNotFoundException;
-	
+	List<Income> viewSpesificCompanyIncome(RequestData companyData) throws NotLogedInException, RequestDataIsNullException;
+	List<Income> viewSpesificCustomerIncome(RequestData customerData) throws NotLogedInException, RequestDataIsNullException;
+	List<Income> viewAllIncome(RequestData requestData) throws NotLogedInException, RequestDataIsNullException;
 }
