@@ -16,6 +16,10 @@ import com.asad.couponesController.exceptions.RequestDataIsNullException;
 
 @ControllerAdvice
 public class ExceptionControllerAdvice {
+	
+	
+	
+	
 	@ExceptionHandler(Exception.class)
     public ResponseEntity<Response> exception(Exception e) {
 		e.printStackTrace();

@@ -30,6 +30,11 @@ public class Income {
 	
 	
 
+	public Income() {
+		super();
+		
+	}
+
 	public Income(String name, LocalDate date, IncomeType descrption, Double amount) {
 		super();
 		this.name = name;

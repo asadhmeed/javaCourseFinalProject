@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestOperationsExtensionsKt;
 
 import com.asad.couponesController.AppLogger;
 import com.asad.couponesController.CheckClientRequest;
@@ -40,6 +41,7 @@ import com.asad.couponesController.exceptions.RequestDataIsNullException;
 @Service
 public class AdministratorServicesImpl implements AdministratorServices {
 
+	// save the log in authorization number of the logged in Administrator
 	private static List<Long> logInIds = new ArrayList<>();
 
 	// connection to the customers table in the data base
@@ -50,44 +52,67 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	@Autowired
 	private CustomerRepository customerDao;
 
-	// connection to the companies table in the data base
+	// connection to the coupons table in the data base
 	@Autowired
 	private CouponRepository couponDao;
 
+	// using the income service (get add the companies and the customers paid
+	// activities )
 	@Autowired
 	private IncomeServices incomeServices;
 
-	/*
+	/**
+	 * administrator log in method
 	 * 
-	 * @see
-	 * com.asad.couponesController.administrator.AdministratorServices#logInCheck(
-	 * com.asad.couponesController.LogIn)
+	 * @param logIn
+	 *            :takes user name and password
+	 * @return logInResponse (if the userName and password valid return LOGINSUCCESS
+	 *         and number for further validation if the user already log in returns
+	 *         ALREADYLOGINEDIN
+	 * @throws LogInDataIsNullException
+	 * @throws RequestDataIsNullException
 	 */
 	public synchronized LogInResponse logIn(LogIn logIn) throws LogInDataIsNullException, RequestDataIsNullException {
-		// TODO:remove logger (admin service)
-		AppLogger.getLogger().log(Level.INFO, logIn.toString());
+		
 		new CheckClientRequest().checkLogIn(logIn);
+		AppLogger.getLogger().log(Level.INFO, "client request Checked");
 
 		if (logIn.getUserId() != null && logInIds.contains(logIn.getUserId())) {
 
-			return new LogInResponse(LogInEnum.ALREADYLOGINEDIN);
+			return new LogInResponse(LogInEnum.ALREADYLOGGEDIN);
 		} else {
+			
 
 			if (logIn.getUserId() != null) {
 				return new LogInResponse(LogInEnum.USERIDISNOTVALID);
 			}
+
 			if (logIn.getUserName().trim().equals("admin") && logIn.getPassword().trim().equals("1234")) {
-				if (this.logInIds.size() == 0) {
-					Long id = LoginIdGenerator.generateId();
-					this.logInIds.add(id);
-					return new LogInResponse(LogInEnum.LOGINSUCCESS, id);
-				}
+
+				Long id = LoginIdGenerator.generateId();
+				this.logInIds.add(id);
+				AppLogger.getLogger().log(Level.INFO, "client id is " + id);
+
+				return new LogInResponse(LogInEnum.LOGINSUCCESS, id);
+
 			}
+
 			return new LogInResponse(LogInEnum.LOGINFAILED);
 		}
 
 	}
 
+	/**
+	 * administrator log out
+	 * 
+	 * @param IdData
+	 *            :takes authorization number (clientId inside a RequestData)
+	 * @return LOGOUTSUCCESS if the authorization number is in the server memory
+	 *         (the logInIds) else return LOGOUTFAILED
+	 * @throws RequestDataIsNullException
+	 * @throws IdIsNullException
+	 * @throws NotLogedInException
+	 */
 	@Override
 	public synchronized ResponseMassageEnum logout(RequestData idData)
 			throws RequestDataIsNullException, NotLogedInException {
@@ -95,8 +120,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		NullCheck.checkIfItIsNull(idData, "admin id is null");
 
 		for (Long id1 : logInIds) {
-			if (idData.getClientId() == id1) {
-				logInIds.remove(idData.getClientId());
+			if ((long) idData.getClientId() == id1) {
+				logInIds.remove((long) idData.getClientId());
+				AppLogger.getLogger().log(Level.INFO, idData.getClientId() + "");
+
+				AppLogger.getLogger().log(Level.INFO, this.logInIds.toString());
+
 				return ResponseMassageEnum.LOGOUTSUCCESS;
 			}
 		}
@@ -105,46 +134,48 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Create a new company
 	 * 
-	 * @see
-	 * com.asad.couponesController.administrator.AdministratorServices#creatCompany(
-	 * com.asad.couponesController.entitys.Company)
+	 * @param requestData:
+	 *            takes Company data and client id in RequestData
+	 * @return COMPANYCREATED if the company successfully created
+	 * @throws NameIsUsedException
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
 	 */
-	public Company creatCompany(RequestData companyData)
+	public ResponseMassageEnum creatCompany(RequestData companyData)
 			throws NameIsUsedException, NotLogedInException, RequestDataIsNullException {
 		new CheckClientRequest().checkCompany(companyData);
 		logInCheck(companyData);
 		try {
-			if (companyData.getCustomer().getCoupons() != null) {
-				Set<Coupon> coupons = companyData.getCustomer().getCoupons();
-				for (Coupon coupon : coupons) {
+			companyDao.save(companyData.getCompany());
 
-					couponDao.save(coupon);
-				}
-			}
-
-			return companyDao.save(companyData.getCompany());
+			return ResponseMassageEnum.COMPANYCREATED;
 		} catch (Exception e) {
 
-			throw new NameIsUsedException("The Name Of The Company Or Name  One Of The Coupons Is Already Used", e);
+			throw new NameIsUsedException(ResponseMassageEnum.COMPANYNAMEISUSED.toString(), e);
 
 		}
 
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * delete a company from the data base
 	 * 
-	 * @see
-	 * com.asad.couponesController.administrator.AdministratorServices#deleteCompany
-	 * (com.asad.couponesController.entitys.Company)
+	 * @param requestData
+	 *            : takes a company data and client id(for authorization) in
+	 *            RequestData
+	 * @return returns COMPANYDELETED if the company fund in the data base and
+	 *         deleted else throws an exception and return COMPANYNOTFOUND
+	 * @throws ComponentNotFoundException
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
 	 */
 	public ResponseMassageEnum deleteCompany(RequestData companyData)
 			throws ComponentNotFoundException, NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(companyData, "you cannot send empty request");
-		NullCheck.checkIfItIsNull(companyData.getCustomer(), "there is no data for the company you want to delete");
+		NullCheck.checkIfItIsNull(companyData.getCompany(), "there is no data for the company you want to delete");
 
 		logInCheck(companyData);
 
@@ -153,17 +184,24 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 			return ResponseMassageEnum.COMPANYDELETED;
 		} catch (Exception e) {
-			throw new ComponentNotFoundException("the company you want to delete  does not exist", e);
+			throw new ComponentNotFoundException(ResponseMassageEnum.COMPANYNOTFOUND.toString(), e);
 
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * update the a company in the data base which has the same id
 	 * 
-	 * @see
-	 * com.asad.couponesController.administrator.AdministratorServices#updateCompany
-	 * (com.asad.couponesController.entitys.Company)
+	 * @param requestData
+	 *            : takes a company data and client id(for authorization) in
+	 *            RequestData
+	 * @return THECOMPANYUPDATED if the company fund in the data base and updated
+	 *         else if the company not fund in the data base return COMPANYNOTFOUND
+	 *         else if the company name is not the same as the company in the data
+	 *         base with the same id
+	 * @throws IdIsNullException
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
 	 */
 
 	public ResponseMassageEnum updateCompany(RequestData companyData)
@@ -179,41 +217,49 @@ public class AdministratorServicesImpl implements AdministratorServices {
 			if (!companyData.getCompany().getCompanyName().trim().equals(companyfromDataBase.getCompanyName().trim())) {
 				throw new RequestDataIsNullException(ResponseMassageEnum.COMPANYNAMEMOSTNOTCHANGE.toString());
 			}
-			// Set<Coupon> coupons = requestData.getCompany().getCoupons();
-			// Set<Coupon> existingCoupons = companyfromDataBase.getCoupons();
-			// if (coupons != null) {
-			/// *---for (int i = 0; i < coupons.size(); i++) {
-			// couponDao.save((Coupon)coupons.toArray()[i]);
-			// existingCoupons.add((Coupon)coupons.toArray()[i]);
-			// }
-			// companyfromDataBase.setCoupons(existingCoupons);
+
 		}
 		companyDao.save(companyData.getCompany());
 		return ResponseMassageEnum.THECOMPANYUPDATED;
 
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * lists all companies from the data base
 	 * 
-	 * @see com.asad.couponesController.administrator.AdministratorServices#
-	 * listAllCompany()
+	 * @param companyData
+	 *            : takes client id in RequestData
+	 * @return list of all companies if the client id correct
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
 	 */
 	public List<Company> listAllCompany(RequestData companyData)
 			throws NotLogedInException, RequestDataIsNullException {
 		logInCheck(companyData);
 		List<Company> companies = (List<Company>) companyDao.findAll();
-		// TODO:remove Logger
-		AppLogger.getLogger().log(Level.INFO, companies.get(0).getCoupons().toString());
 
 		return companies;
 	}
 
+	/**
+	 * get company by id from the data base
+	 * 
+	 * @param companyRequestData
+	 *            : takes a company data (minimum id data) and client id(for
+	 *            authorization) in RequestData
+	 * @return COMPANYNOTFOUND if the company id in the request data dose not match
+	 *         any of the companies in the data base
+	 * @throws IdIsNullException
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
+	 * @throws ComponentNotFoundException
+	 */
+
 	public Company getCompanyById(RequestData companyData)
 			throws IdIsNullException, NotLogedInException, ComponentNotFoundException, RequestDataIsNullException {
 		logInCheck(companyData);
-		NullCheck.checkIfItIsNull(companyData.getCustomer(), "you cannot send empty request");
-		NullCheck.checkIfItIsNull(companyData.getCustomer().getId(), "the Company id you want to delete is empty");
+		NullCheck.checkIfItIsNull(companyData.getCompany(), "you cannot send empty request");
+		NullCheck.checkIfItIsNull(companyData.getCompany().getId(), "the Company id you want to delete is empty");
 
 		Company company = companyDao.findCompanyById(companyData.getCustomer().getId());
 		if (company == null) {
@@ -223,33 +269,44 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////
-
-	// Customers------------------------------------------
 	/**
-	 * @throws RequestDataIsNullException
+	 * Create a new customer
 	 * 
+	 * @param requestData
+	 *            : takes customer data and client id (for authorization) in
+	 *            RequestData
+	 * @return CUSTOMERCREATED if the customer successfully created
+	 * @throws NameIsUsedException
+	 * @throws NotLogedInException
+	 * @throws RequestDataIsNullException
 	 */
-	public Customer creatCustomer(RequestData customerData)
+	public ResponseMassageEnum creatCustomer(RequestData customerData)
 			throws NameIsUsedException, NotLogedInException, RequestDataIsNullException {
 
 		logInCheck(customerData);
 		new CheckClientRequest().checkCustomer(customerData);
 
 		try {
-			return this.customerDao.save(customerData.getCustomer());
+
+			this.customerDao.save(customerData.getCustomer());
+			return ResponseMassageEnum.CUSTOMERCREATED;
 
 		} catch (Exception e) {
-			throw new NameIsUsedException("The Name Of The Customer Is Allready Used", e);
+			throw new NameIsUsedException(ResponseMassageEnum.CUSTOMERNAMEISUSED.toString(), e);
 		}
 	}
 
 	/**
+	 * delete a customer from the data base
+	 * 
+	 * @param requestData
+	 *            : takes a customer data and client id(for authorization) in
+	 *            RequestData
+	 * @return CUSTUMERDELETED if the customer is fund in the data base and deleted
+	 * @throws ComponentNotFoundException
+	 *             and return as a massage CUSTOMERNOTFOUND
 	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
-	 * 
 	 */
 	public ResponseMassageEnum deleteCustomer(RequestData customerData) throws ComponentNotFoundException // CustomerDeleted
 			, NotLogedInException, RequestDataIsNullException {
@@ -261,16 +318,21 @@ public class AdministratorServicesImpl implements AdministratorServices {
 			Customer customer = customerDao.findCustomerById(customerData.getCustomer().getId());
 			customerDao.delete(customer);
 
-			return ResponseMassageEnum.CUSTUMBERDELETED;
+			return ResponseMassageEnum.CUSTUMERDELETED;
 		} catch (Exception e) {
-			throw new ComponentNotFoundException("the customer you want to delete does not exist", e);
+			throw new ComponentNotFoundException(ResponseMassageEnum.CUSTOMERNOTFOUND.toString(), e);
 
 		}
 	}
 
 	/**
-	 * @param customer
-	 * @return
+	 * update customer data in the data base
+	 * 
+	 * @param customerData
+	 *            : takes customer data and client id( for authorization) in
+	 *            RequestData
+	 * @return THECUSTOMERUPDATED if the customer is fund in the data base and
+	 *         updated else return CUSTOMERNOTFOUND
 	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
 	 */
@@ -290,7 +352,11 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	}
 
 	/**
-	 * @return
+	 * lists all the customers in the data base
+	 * 
+	 * @param adminData
+	 *            : takes client id(for authorization)
+	 * @return list of all customers
 	 * @throws NotLogedInException
 	 * @throws RequestDataIsNullException
 	 */
@@ -303,12 +369,18 @@ public class AdministratorServicesImpl implements AdministratorServices {
 	}
 
 	/**
-	 * @param name
-	 * @return
+	 * get customer by id
+	 * 
+	 * @param customerRequestData
+	 *            : takes customer data minimum id and client id in RequestData
+	 * 
+	 * @return customer data from the data base if its found else return
+	 *         CUSTOMERNOTFOUND massage
 	 * @throws IdIsNullException
 	 *             ,notLogedInException
 	 * @throws RequestDataIsNullException
 	 * @throws ComponentNotFoundException
+	 *             : with massage CUSTOMERNOTFOUND
 	 */
 	@Override
 	public Customer getCustomerById(RequestData customerRequestData)
@@ -325,10 +397,12 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		return customer;
 	}
 
+	// an eternal method that checks if the request sender is authorized
 	private void logInCheck(RequestData requestData) throws NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(requestData, "you cannot send empty request");
+		NullCheck.checkIfItIsNull(requestData.getClientId(), "log in error you need to log in");
 
-		Long id = requestData.getClientId();
+		Long id = (long) requestData.getClientId();
 		try {
 			if (!logInIds.contains(id)) {
 				throw new NotLogedInException(LogInEnum.NOTLOGEDIN.toString());
@@ -339,11 +413,32 @@ public class AdministratorServicesImpl implements AdministratorServices {
 
 	}
 
+	/**
+	 * get the client name
+	 * 
+	 * @param clientId
+	 *            : takes client id
+	 * @return client name
+	 * 
+	 */
 	@Override
 	public String getClientName(Long clientId) {
 
 		return "admin";
 	}
+
+	/**
+	 * view specific company income
+	 * 
+	 * @param companyData
+	 *            : takes company data and client id( for authorization) in
+	 *            RequestData
+	 * @return list of the company income history
+	 * @throws NotLogedInException
+	 *             : if the client id is not valid
+	 * @throws RequestDataIsNullException
+	 *             : if the data of the company is not valid
+	 */
 
 	@Override
 	public List<Income> viewSpesificCompanyIncome(RequestData companyData)
@@ -364,6 +459,18 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		return companyIncomes;
 	}
 
+	/**
+	 * view specific customer income
+	 * 
+	 * @param companyData
+	 *            : takes customer data and client id( for authorization) in
+	 *            RequestData
+	 * @return list of the customer income history
+	 * @throws NotLogedInException
+	 *             : if the client id is not valid
+	 * @throws RequestDataIsNullException
+	 *             : if the data of the customer is not valid
+	 */
 	@Override
 	public List<Income> viewSpesificCustomerIncome(RequestData customerData)
 			throws NotLogedInException, RequestDataIsNullException {
@@ -380,6 +487,16 @@ public class AdministratorServicesImpl implements AdministratorServices {
 		return companyIncomes;
 	}
 
+	/**
+	 * 
+	 * @param requestData
+	 *            :takes the client id in RequestData
+	 * @return list of all the income in the data base
+	 * @throws NotLogedInException
+	 *             : if the client id not valid
+	 * @throws RequestDataIsNullException
+	 *             : if the request data or id is empty
+	 */
 	@Override
 	public List<Income> viewAllIncome(RequestData requestData) throws NotLogedInException, RequestDataIsNullException {
 		logInCheck(requestData);

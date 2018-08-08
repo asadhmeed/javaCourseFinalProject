@@ -9,7 +9,7 @@ public class RequestData {
 	private Company company;
 	private Customer customer;
 	private Coupon coupon;
-	private Long clientId;
+	private Integer clientId;
 	
 	
 	
@@ -38,10 +38,10 @@ public class RequestData {
 	public void setCoupon(Coupon coupon) {
 		this.coupon = coupon;
 	}
-	public Long getClientId() {
+	public Integer getClientId() {
 		return clientId;
 	}
-	public void setClientId(Long customerId) {
+	public void setClientId(Integer customerId) {
 		clientId = customerId;
 	}
 	@Override

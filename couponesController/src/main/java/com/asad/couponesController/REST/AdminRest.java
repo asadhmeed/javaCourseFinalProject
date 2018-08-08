@@ -1,10 +1,14 @@
 package com.asad.couponesController.REST;
 
+import java.util.logging.Level;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.asad.couponesController.AppLogger;
 import com.asad.couponesController.LogIn;
 import com.asad.couponesController.RequestData;
 import com.asad.couponesController.Response;
@@ -41,6 +45,7 @@ public class AdminRest implements CouponClaintREST {
 	@PostMapping("/creatCompany")
 	public Response creatCompany(@RequestBody RequestData companyRequestData) throws NameIsUsedException // companyCreated
 			, NotLogedInException, RequestDataIsNullException {
+		AppLogger.getLogger().log(Level.INFO, companyRequestData.getCompany().toString());
 	return new Response(admin.creatCompany(companyRequestData));
 		
 	
@@ -63,6 +68,8 @@ public class AdminRest implements CouponClaintREST {
 	public Response listAllCompany(@RequestBody RequestData companyRequestData) throws NotLogedInException, RequestDataIsNullException {
 		return new Response(admin.listAllCompany(companyRequestData));
 	}
+	
+	
 
 	@PostMapping("/getCompany")
 	public Response getCompanyByName(@RequestBody RequestData companyRequestData)
@@ -121,6 +128,8 @@ public class AdminRest implements CouponClaintREST {
 		return new Response(admin.viewSpesificCompanyIncome(companyData));
 		
 	}
+	
+	//TODO:continue testing
 	@PostMapping("/getAllIncome")
 	public Response getAllIncome(@RequestBody RequestData requestData)
 			throws NotLogedInException, RequestDataIsNullException {

@@ -41,14 +41,14 @@ public class IncomeServicesImpl implements IncomeServices {
 			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException,
 			CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException,
 			ComponentNotFoundException {
+		// TODO:update the method to return a massage and price for purchase,create or update coupon
 		switch (clientType) {
 		case COMPANY:
 			switch (actionType) {
 			case CREAT:
 				Response CreatResponse = new Response(companyServices.creatCoupon(requestData));
-				AppLogger.getLogger().log(Level.INFO, CreatResponse.toString());
 				if (CreatResponse.getResponse() != null) {
-					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(),
+					incomeDao.save(new Income(companyServices.getClientName((long)requestData.getClientId()), LocalDate.now(),
 							IncomeType.COMPANY_NEW_COUPON, 100d));
 				}
 				return CreatResponse;
@@ -56,7 +56,7 @@ public class IncomeServicesImpl implements IncomeServices {
 			case UPDATE:
 				Response UpdateResponse = new Response(companyServices.updateCoupon(requestData));
 				if (UpdateResponse.getResponse() != null) {
-					incomeDao.save(new Income(companyServices.getClientName(requestData.getClientId()), LocalDate.now(),
+					incomeDao.save(new Income(companyServices.getClientName((long)requestData.getClientId()), LocalDate.now(),
 							IncomeType.COMPANY_UPDATE_COUPON, 10d));
 
 				}
@@ -71,7 +71,7 @@ public class IncomeServicesImpl implements IncomeServices {
 			case PURCHASE:
 				Response PurchaseResponse = new Response(customerServices.beyACoupon(requestData));
 				if (PurchaseResponse.getResponse() != null) {
-					incomeDao.save(new Income(customerServices.getClientName(requestData.getClientId()),
+					incomeDao.save(new Income(customerServices.getClientName((long)requestData.getClientId()),
 							LocalDate.now(), IncomeType.CUSTOMER_PURCHASE, requestData.getCoupon().getPrice()));
 				}
 				return PurchaseResponse;
@@ -92,7 +92,7 @@ public class IncomeServicesImpl implements IncomeServices {
 	@Override
 	public List<Income> viewIncomeByClientNameAndIncomeType(String name, IncomeType incomeType) {
 
-		return incomeDao.findByIncomeTypeAndName(incomeType, name);
+		return incomeDao.findByDescrptionAndName(incomeType, name);
 
 	}
 

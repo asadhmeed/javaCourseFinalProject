@@ -17,10 +17,10 @@ import com.asad.couponesController.exceptions.NotLogedInException;
 
 public interface CompanyServices extends LogInService {
 
-	Coupon creatCoupon(RequestData couponData)
+	ResponseMassageEnum creatCoupon(RequestData couponData)
 			throws NameIsUsedException, RequestDataIsNullException, NotLogedInException;
 
-	Coupon deleteCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException;
+	ResponseMassageEnum deleteCoupon(RequestData couponData) throws RequestDataIsNullException, NotLogedInException;
 
 	Set<Coupon> getSpecificCouponsForCumpany(RequestData SpecificCouponData)
 			throws IdIsNullException, ComponentNotFoundException, NotLogedInException, RequestDataIsNullException;

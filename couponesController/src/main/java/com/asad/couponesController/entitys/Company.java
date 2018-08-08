@@ -84,7 +84,10 @@ public class Company {
 
 	@Override
 	public String toString() {
-		return "Company -> id = " + id + ", companyName=" + companyName + ", email=" + email;
+		return "Company [id=" + id + ", companyName=" + companyName + ", password=" + password + ", email=" + email
+				+ "]";
 	}
+
+	
 
 }

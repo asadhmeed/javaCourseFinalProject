@@ -13,6 +13,6 @@ public interface IncomeRepository  extends CrudRepository<Income, Long>{
 
 
 
-	List<Income> findByIncomeTypeAndName(IncomeType incomeType, String name);
+	List<Income> findByDescrptionAndName(IncomeType descrption, String name);
 	
 }
