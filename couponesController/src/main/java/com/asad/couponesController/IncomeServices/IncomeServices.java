@@ -19,10 +19,14 @@ import com.asad.couponesController.exceptions.RequestDataIsNullException;
 import com.asad.couponesController.exceptions.NotLogedInException;
 
 public interface IncomeServices {
+	
+	
 	Response storeIncome(RequestData requestData, ClientType clientType, ActionType actionType)
 			throws IncomeIsNullException, NameIsUsedException, RequestDataIsNullException, NotLogedInException,
 			CouponIsAlreadyPurchasedException, IdIsNullException, CustomerPurchaseDataException, ComponentNotFoundException;
+	
 	List<Income> viewAllIncome();
+	
 	List<Income> viewIncomeByClientNameAndIncomeType(String name,IncomeType incomeType);
 	
 }

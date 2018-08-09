@@ -58,7 +58,8 @@ public class CustomerServicesImpl implements CustomerServices {
 		NullCheck.checkIfItIsNull(logIn, "your request is empty ");
 		if (logIn.getUserId() == null) {
 			Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
-
+			// TODO:log
+			AppLogger.getLogger().log(Level.INFO, customer.toString());
 			if (customer != null) {
 				for (Long customerInMapId : logedInCustomers.keySet()) {
 					if (customer.getId().equals(logedInCustomers.get(customerInMapId).getId())) {
@@ -68,8 +69,7 @@ public class CustomerServicesImpl implements CustomerServices {
 				}
 				Long logInPassCode = LoginIdGenerator.generateId();
 				logedInCustomers.put(logInPassCode, customer);
-				// TODO:log
-				AppLogger.getLogger().log(Level.INFO, customer.toString());
+				
 				return new LogInResponse(LogInEnum.LOGINSUCCESS, logInPassCode);
 			} else {
 				return new LogInResponse(LogInEnum.LOGINFAILED);
@@ -175,7 +175,7 @@ public class CustomerServicesImpl implements CustomerServices {
 	// an eternal method that checks if the request sender is authorized
 	private void logInCheck(RequestData requestData) throws NotLogedInException, RequestDataIsNullException {
 		NullCheck.checkIfItIsNull(requestData, "your request is empty ");
-		NullCheck.checkIfItIsNull((long)requestData.getClientId(), "log in error you need to log in");
+		NullCheck.checkIfItIsNull(requestData.getClientId(), "log in error you need to log in");
 
 		try {
 			if (!this.logedInCustomers.containsKey((long)requestData.getClientId())) {

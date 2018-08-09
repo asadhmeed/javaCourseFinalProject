@@ -17,16 +17,18 @@ public class DailyCouponExpirationTask implements Runnable {
 	
 	CouponRepository couponDao;
 
-	
+	/**
+	 * iterates on all the coupons in the coupon table and check the end data 
+	 * and deletes the out of data coupons
+	 */
 	public DailyCouponExpirationTask(CouponRepository couponDao) {
 		
 		this.couponDao = couponDao;
 	}
 
-
+	
 	@Override
 	public void run() {
-		// TODO:fix the thread bug thread does not restart after the first time
 		AppLogger.getLogger().log(Level.INFO, "start Coupon end date check");
 		Set<Coupon> coupons = new HashSet<>((ArrayList<Coupon>)couponDao.findAll()) ;
 		if (coupons != null) {
