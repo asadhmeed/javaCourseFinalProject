@@ -17,7 +17,7 @@ public final class LoginIdGenerator {
 		String strId ="";
 		Random random = new Random();
 		for (int i = 0; i < 8; i++) {
-			strId+= random.nextInt(10);
+			strId+= random.nextInt(9);
 		}
 //		return (Long) LoginIdGenerator.ID;
 		return Long.parseLong(strId);

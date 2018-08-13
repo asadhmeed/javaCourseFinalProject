@@ -58,9 +58,10 @@ public class CustomerServicesImpl implements CustomerServices {
 		NullCheck.checkIfItIsNull(logIn, "your request is empty ");
 		if (logIn.getUserId() == null) {
 			Customer customer = customerDao.findCustomerByNameAndPassword(logIn.getUserName(), logIn.getPassword());
-			// TODO:log
-			AppLogger.getLogger().log(Level.INFO, customer.toString());
+			
 			if (customer != null) {
+				// TODO:log
+				AppLogger.getLogger().log(Level.INFO, customer.toString());
 				for (Long customerInMapId : logedInCustomers.keySet()) {
 					if (customer.getId().equals(logedInCustomers.get(customerInMapId).getId())) {
 						
