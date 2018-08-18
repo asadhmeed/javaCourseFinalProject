@@ -2,7 +2,11 @@ package com.asad.couponesController;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-
+/**
+ * 
+ * @author asad
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response {
 

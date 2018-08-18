@@ -3,7 +3,11 @@ package com.asad.couponesController;
 import com.asad.couponesController.entitys.Company;
 import com.asad.couponesController.entitys.Coupon;
 import com.asad.couponesController.entitys.Customer;
-
+/**
+ * 
+ * @author asad
+ *
+ */
 public class RequestData {
 	private SpecificCouponData specificCouponData;
 	private Company company;

@@ -13,13 +13,13 @@ public final class LoginIdGenerator {
  * @return client id (long)
  */
 	public synchronized static Long generateId(){
-//		LoginIdGenerator.ID++;
+
 		String strId ="";
 		Random random = new Random();
 		for (int i = 0; i < 8; i++) {
 			strId+= random.nextInt(9);
 		}
-//		return (Long) LoginIdGenerator.ID;
+
 		return Long.parseLong(strId);
 	}
 
